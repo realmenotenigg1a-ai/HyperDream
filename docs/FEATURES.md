@@ -7,13 +7,17 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 | Feature | What it actually does | Verification |
 | --- | --- | --- |
 | Launcher duration control | Opt-in multipliers on `ValueAnimator.setDuration(long)` in `com.miui.home` main process | JVM math/policy tests; actual HyperOS effects need device testing |
-| Duration presets | 0.5×, 0.75×, 1×, 1.5× | Settings persisted privately; reboot to apply to launcher |
-| Restore defaults | Saves disabled / 1× | Reboot required to remove a running process's existing hook |
-| Glass-inspired settings UI | Gradient backdrop, translucent rounded panels, edge highlights, ripple buttons | Native Android views; no live blur/refraction |
+| Easing presets | Original, smooth, emphasized/liquid-glide, and linear via `setInterpolator` | Curve-only configuration at 1× supported; device effects unverified |
+| Optional delay scaling | Applies duration multiplier to explicit `setStartDelay` calls | Off by default |
+| Launcher restart | Confirmation + root; fixed launcher-only force-stop/relaunch command | Owner profile, default Home, timeout, error checks; device testing required |
+| Device/build report | Locally display/copy Android build and launcher version | No automatic upload or claim of HyperOS verification |
+| Duration presets | 0.5×, 0.75×, 1×, 1.5× | Settings persisted privately; restart launcher or reboot to apply |
+| Restore defaults | Saves disabled / 1× / original curve / unscaled delays | Launcher restart or reboot required to remove a running process's existing hook |
+| Glass-inspired settings UI | Gradient backdrop, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; no live blur/refraction |
 | In-app motion | Staggered entry and a replayable icon-to-card illustration | Local only; never used as proof the launcher hook works |
 | Reduced-motion behavior | Skips entry motion and shows a still preview when system animator duration scale is zero | Device accessibility verification still needed |
 
-The preview illustrates **only the duration preset**. Its own easing curves are presentation choices, not configurable HyperOS curves. It works with the module disabled and outside LSPosed. It is not a live recording or simulation of private launcher internals.
+The preview illustrates **the selected duration, easing preset, and optional delay scaling**. Original easing uses demonstration curves; selected presets are also wired to the launcher setter hook but do not simulate private HyperOS springs. It works with the module disabled and outside LSPosed. It is not a live recording or simulation of private launcher internals.
 
 ## Planned / not implemented
 
@@ -23,7 +27,7 @@ The preview illustrates **only the duration preset**. Its own easing curves are 
 | Folders | Grid, popup size, visual treatment, open/close motion | Identify folder implementation in supported launcher builds |
 | Recents / task switcher | Layout styles, card size/labels, switching behavior | Determine launcher vs system ownership; do not broaden scope blindly |
 | Gestures | Home gesture behavior, swipe response, navigation motion | Inspect input ownership, cancellation, and accessibility behavior |
-| Advanced animation | Springs, curves, app return, per-app profiles | Identify and version-gate private animation/remote-transition APIs |
+| Advanced animation | Private springs, custom curve editing, app return, per-app profiles | Identify and version-gate private animation/remote-transition APIs |
 | DIY-style arrangement | More flexible element placement | Investigate layout persistence, widgets, touch targets, and safe reset |
 | Backup / restore | Layout snapshots and recovery | Validate schema compatibility and transactional restore before any writes |
 | Share panel | Sharing layout/options | Research only; may be outside launcher scope or infeasible |

@@ -25,6 +25,8 @@ public final class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putBoolean(AnimationSettings.KEY_ENABLED, settings.enabled);
         result.putFloat(AnimationSettings.KEY_DURATION_SCALE, settings.durationScale);
+        result.putString(AnimationSettings.KEY_CURVE, settings.curve);
+        result.putBoolean(AnimationSettings.KEY_SCALE_DELAYS, settings.scaleDelays);
         return result;
     }
 

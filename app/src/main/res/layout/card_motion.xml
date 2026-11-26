@@ -37,6 +37,22 @@
         <RadioButton android:id="@+id/duration_default" style="@style/DurationOption" android:text="@string/duration_default" />
         <RadioButton android:id="@+id/duration_relaxed" style="@style/DurationOption" android:text="@string/duration_relaxed" />
     </RadioGroup>
+    <TextView style="@style/GlassBody" android:labelFor="@id/curve_presets" android:text="@string/curve_heading" />
+    <RadioGroup
+        android:id="@+id/curve_presets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton android:id="@+id/curve_system" style="@style/DurationOption" android:text="@string/curve_system" />
+        <RadioButton android:id="@+id/curve_smooth" style="@style/DurationOption" android:text="@string/curve_smooth" />
+        <RadioButton android:id="@+id/curve_emphasized" style="@style/DurationOption" android:text="@string/curve_emphasized" />
+        <RadioButton android:id="@+id/curve_linear" style="@style/DurationOption" android:text="@string/curve_linear" />
+    </RadioGroup>
+    <Switch
+        android:id="@+id/scale_delays"
+        style="@style/DurationOption"
+        android:text="@string/scale_delays" />
+    <TextView style="@style/GlassBody" android:text="@string/curve_notice" android:textSize="13sp" />
     <Button android:id="@+id/reset_settings" style="@style/GlassButton" android:text="@string/reset_settings" />
     <TextView style="@style/GlassBody" android:text="@string/restart_notice" android:textColor="@color/warning" android:textSize="13sp" />
 </LinearLayout>

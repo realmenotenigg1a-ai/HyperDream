@@ -12,18 +12,28 @@ final class SettingsStore {
         try {
             return new AnimationSettings(
                     prefs.getBoolean(AnimationSettings.KEY_ENABLED, false),
-                    prefs.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f));
+                    prefs.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f),
+                    prefs.getString(AnimationSettings.KEY_CURVE, AnimationSettings.CURVE_SYSTEM),
+                    prefs.getBoolean(AnimationSettings.KEY_SCALE_DELAYS, false));
         } catch (ClassCastException malformedPreferences) {
             return new AnimationSettings(false, 1f);
         }
     }
 
-    static void write(Context context, boolean enabled, float scale) {
+    static void write(Context context, AnimationSettings settings) {
         preferences(context).edit()
-                .putBoolean(AnimationSettings.KEY_ENABLED, enabled)
+                .putBoolean(AnimationSettings.KEY_ENABLED, settings.enabled)
                 .putFloat(AnimationSettings.KEY_DURATION_SCALE,
-                        AnimationSettings.sanitizeScale(scale))
+                        settings.durationScale)
+                .putString(AnimationSettings.KEY_CURVE, settings.curve)
+                .putBoolean(AnimationSettings.KEY_SCALE_DELAYS, settings.scaleDelays)
                 .apply();
+    }
+
+    /** Call off the UI thread before explicitly restarting the settings reader. */
+    static boolean flush(Context context) {
+        // A synchronous commit waits for outstanding apply() writes as documented by Android.
+        return preferences(context).edit().commit();
     }
 
     private static SharedPreferences preferences(Context context) {

@@ -1,6 +1,7 @@
 package io.github.hyperdream.module;
 
 import android.animation.AnimatorSet;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -32,7 +33,7 @@ public final class MotionPreviewView extends View {
                 Color.rgb(36, 52, 84), Color.rgb(13, 39, 48), Shader.TileMode.CLAMP);
     }
 
-    public void play(float durationScale) {
+    public void play(float durationScale, String curve, boolean scaleDelays) {
         stop();
         if (!ValueAnimator.areAnimatorsEnabled()) {
             progress = 1f;
@@ -40,15 +41,18 @@ public final class MotionPreviewView extends View {
             announceForAccessibility(getContext().getString(R.string.preview_reduced_motion));
             return;
         }
-        AnimationSettings previewSettings = new AnimationSettings(true, durationScale);
+        AnimationSettings previewSettings = new AnimationSettings(true, durationScale, curve, scaleDelays);
+        TimeInterpolator selectedCurve = MotionCurves.create(previewSettings.curve);
         ValueAnimator opening = ValueAnimator.ofFloat(0f, 1f);
         opening.setDuration(previewSettings.scaleDuration(480));
-        opening.setInterpolator(new PathInterpolator(0.16f, 1f, 0.3f, 1f));
+        opening.setInterpolator(selectedCurve != null ? selectedCurve
+                : new PathInterpolator(0.16f, 1f, 0.3f, 1f));
         opening.addUpdateListener(animator -> updateProgress((float) animator.getAnimatedValue()));
         ValueAnimator closing = ValueAnimator.ofFloat(1f, 0f);
-        closing.setStartDelay(400);
+        closing.setStartDelay(previewSettings.scaleStartDelay(400));
         closing.setDuration(previewSettings.scaleDuration(360));
-        closing.setInterpolator(new PathInterpolator(0.4f, 0f, 0.8f, 1f));
+        closing.setInterpolator(selectedCurve != null ? selectedCurve
+                : new PathInterpolator(0.4f, 0f, 0.8f, 1f));
         closing.addUpdateListener(animator -> updateProgress((float) animator.getAnimatedValue()));
         playback = new AnimatorSet();
         playback.playSequentially(opening, closing);

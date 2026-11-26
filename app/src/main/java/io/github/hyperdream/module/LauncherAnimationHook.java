@@ -1,18 +1,21 @@
 package io.github.hyperdream.module;
 
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
-/** Uses a public Android API, not guessed private HyperOS method names. */
+/** Launcher-local public Android API hooks, not private HyperOS transition hooks. */
 final class LauncherAnimationHook {
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
@@ -32,36 +35,69 @@ final class LauncherAnimationHook {
                                     Uri.parse("content://" + AnimationSettings.AUTHORITY),
                                     AnimationSettings.METHOD_READ, null, null);
                             if (result == null) {
-                                XposedBridge.log("[HyperDream] Settings unavailable; no animation hook installed.");
+                                XposedBridge.log("[HyperDream] Settings unavailable; no animation hooks installed.");
                                 return;
                             }
                             AnimationSettings settings = new AnimationSettings(
                                     result.getBoolean(AnimationSettings.KEY_ENABLED, false),
-                                    result.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f));
-                            if (!settings.enabled || settings.durationScale == 1f) {
-                                XposedBridge.log("[HyperDream] Launcher loaded; duration control off or 1x. No animation hook installed.");
+                                    result.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f),
+                                    result.getString(AnimationSettings.KEY_CURVE),
+                                    result.getBoolean(AnimationSettings.KEY_SCALE_DELAYS, false));
+                            if (!settings.hasOverrides()) {
+                                XposedBridge.log("[HyperDream] Launcher loaded; controls off or original. No animation hooks installed.");
                                 return;
                             }
-                            installDurationHook(settings);
+                            installAnimationHooks(settings);
                         } catch (RuntimeException | LinkageError failure) {
-                            // A missing/blocked settings bridge must not prevent launcher startup.
-                            XposedBridge.log("[HyperDream] Initialization failed; leaving animations unchanged: "
+                            XposedBridge.log("[HyperDream] Initialization failed: "
                                     + failure.getClass().getSimpleName());
                         }
                     }
                 });
     }
 
-    private static void installDurationHook(AnimationSettings settings) {
-        // Hook only ValueAnimator. Hooking AnimatorSet as well would scale children twice.
-        XposedHelpers.findAndHookMethod(ValueAnimator.class, "setDuration", long.class,
-                new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) {
-                        param.args[0] = settings.scaleDuration((long) param.args[0]);
-                    }
-                });
-        XposedBridge.log("[HyperDream] Launcher ValueAnimator duration hook installed; scale="
-                + settings.durationScale + ". This does not verify HyperOS transition compatibility.");
+    private static void installAnimationHooks(AnimationSettings settings) {
+        List<XC_MethodHook.Unhook> installed = new ArrayList<>();
+        try {
+            if (settings.durationScale != 1f) {
+                // Do not also hook AnimatorSet: that would scale child durations twice.
+                installed.add(XposedHelpers.findAndHookMethod(ValueAnimator.class,
+                        "setDuration", long.class, new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) {
+                                param.args[0] = settings.scaleDuration((long) param.args[0]);
+                            }
+                        }));
+                if (settings.scaleDelays) {
+                    installed.add(XposedHelpers.findAndHookMethod(ValueAnimator.class,
+                            "setStartDelay", long.class, new XC_MethodHook() {
+                                @Override
+                                protected void beforeHookedMethod(MethodHookParam param) {
+                                    param.args[0] = settings.scaleStartDelay((long) param.args[0]);
+                                }
+                            }));
+                }
+            }
+            TimeInterpolator curve = MotionCurves.create(settings.curve);
+            if (curve != null) {
+                installed.add(XposedHelpers.findAndHookMethod(ValueAnimator.class,
+                        "setInterpolator", TimeInterpolator.class, new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) {
+                                param.args[0] = curve;
+                            }
+                        }));
+            }
+        } catch (RuntimeException | LinkageError failure) {
+            for (XC_MethodHook.Unhook hook : installed) {
+                hook.unhook();
+            }
+            XposedBridge.log("[HyperDream] Hook registration failed; registered animation hooks rolled back.");
+            throw failure;
+        }
+        XposedBridge.log("[HyperDream] Launcher ValueAnimator hooks registered: duration="
+                + settings.durationScale + ", curve=" + settings.curve
+                + ", scaleDelays=" + settings.scaleDelays
+                + ". Registration is not HyperOS compatibility verification.");
     }
 }

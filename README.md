@@ -8,7 +8,7 @@
 
 An animation-customization module targeting **Xiaomi HyperOS 4**, inspired by the home-screen customization experience of **Samsung Home Up**.
 
-**Status: Early development · Experimental LSPosed duration control · Device testing needed**
+**Status: Early development · Experimental LSPosed motion controls · Device testing needed**
 
 </div>
 
@@ -59,29 +59,33 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 
 ## Current implementation
 
-The first experimental control changes durations passed to **Android `ValueAnimator.setDuration(long)` inside the Xiaomi launcher's main process**. It does not change global animation scales or other apps' processes.
+The experimental controls hook **Android `ValueAnimator` duration, interpolator, and optional start-delay setters inside the Xiaomi launcher's main process**. It does not change global animation scales or other apps' processes.
 
 - **Off by default** — enable the control explicitly in the HyperDream app.
 - **Duration presets** — 0.5× (fast), 0.75× (quick), 1× (original), and 1.5× (relaxed). These multiply duration, not speed.
-- **Restore defaults** — disables the control and resets the multiplier to 1×.
-- **Reboot to apply** — settings are read once at launcher startup. Disabling or resetting also requires a reboot to remove the previous process's hook.
+- **Easing presets** — original, smooth, liquid glide (emphasized ease-out), or linear. A curve-only override works even at 1× duration.
+- **Optional delay scaling** — scales explicit `setStartDelay` calls by the duration multiplier; off by default.
+- **Restore defaults** — disables the controls, resets the multiplier to 1×, restores original easing, and stops scaling delays.
+- **Restart to apply** — settings are read once at launcher startup. Use the root-confirmed launcher restart shortcut or reboot, including after disabling/resetting.
+- **Launcher restart** — a fixed, user-confirmed root command force-stops and reopens only `com.miui.home`. Owner profile and Xiaomi launcher as default Home are required. No data is cleared; no automatic restart occurs.
+- **Build details** — displays device/Android incremental build and launcher version, with user-initiated copying. It does not certify HyperOS support.
 - **Read-only settings bridge** — app-private preferences are exposed only to the module's own UID and the Xiaomi launcher's UID; remote writes are not supported.
 - **Restricted scope** — only `com.miui.home`, with an additional main-process check in code.
 - **Failure fallback** — if settings cannot be read, the animation hook is not installed.
 
 ### Glass-inspired motion studio
 
-The settings app now uses a blue/teal gradient backdrop, translucent rounded cards, edge highlights, and ripple controls. This is a **liquid-glass-inspired visual treatment**, not live background blur or optical refraction.
+The settings app now uses a blue/teal gradient backdrop, translucent rounded cards, edge highlights, and ripple/soft-press controls. This is a **liquid-glass-inspired visual treatment**, not live background blur or optical refraction.
 
-A replayable local motion illustration shows the selected duration preset without requiring LSPosed. It is labeled as an illustration and works even when the module control is off. Its easing does not change the launcher. Entry transitions and preview playback respect the system animation-off setting, and playback stops when the app leaves the foreground.
+A replayable local motion illustration shows the selected duration, easing, and optional delay settings without requiring LSPosed. It is labeled as an illustration and works even when the module control is off. The selected preset is also wired to launcher interpolator setter calls, but the preview is not proof any particular HyperOS transition uses them. Original easing in the preview uses demonstration curves, not the device's curves. Entry transitions and preview playback respect the system animation-off setting, and playback stops when the app leaves the foreground.
 
 The in-app **Beyond motion** section lists planned home-screen, folder, recents, gesture, advanced-animation, and layout/sharing work. Those are not working controls. See the [feature scope and implementation gates](docs/FEATURES.md); this is not a claim that every Home Up feature has been implemented or is possible on HyperOS.
 
 ### Limitations
 
-This is **not yet a Home Up equivalent**. It has not been verified on a HyperOS 4 device. It only affects durations explicitly passed through `ValueAnimator.setDuration` after initialization; it does not override default durations that never use that setter. ObjectAnimator calls delegating to that API can be affected too.
+This is **not yet a Home Up equivalent**. It has not been verified on a HyperOS 4 device. It only affects explicit `ValueAnimator.setDuration`, `setInterpolator`, and optional `setStartDelay` calls after initialization; it does not override values that never pass through those setters. ObjectAnimator calls delegating to that API can be affected too.
 
-The control may change multiple launcher effects, not just app open/close animations. Private spring engines, render-thread animations, system-managed remote transitions, and animations in other processes may not be affected at all. Custom curves, spring parameters, per-app controls, recents styles, and a live preview are not implemented.
+The control may change multiple launcher effects, not just app open/close animations. Private spring engines, render-thread animations, system-managed remote transitions, and animations in other processes may not be affected at all. Custom curve editing, spring parameters, launcher icon sizing/grids, per-app controls, recents styles, and a live launcher preview are not implemented.
 
 The app's Android 12+ minimum SDK is a development baseline, **not** a claim of HyperOS compatibility. This project uses the classic Xposed API rather than the modern libxposed API. The settings screen reports saved configuration, not verified module activation or effective animation behavior.
 
@@ -114,9 +118,9 @@ There is **no published release yet**, and this implementation has not been veri
    [HyperDream] Loaded in com.miui.home main process.
    ```
 
-6. Open HyperDream, choose a duration preset such as **0.75×**, and enable experimental duration control.
-7. Reboot. Look for `[HyperDream] Launcher ValueAnimator duration hook installed; scale=0.75` in LSPosed logs, then test launcher behavior. That log only confirms hook registration, not that any particular transition uses it.
-8. To revert, tap **Restore defaults** and reboot. Confirm that the next startup logs that duration control is off or 1×.
+6. Open HyperDream, choose a duration preset such as **0.75×**, and enable experimental motion controls.
+7. Use **Restart Xiaomi launcher** and confirm/grant root, or reboot. Look for `[HyperDream] Launcher ValueAnimator hooks registered: duration=0.75` in LSPosed logs, then test launcher behavior. That log only confirms hook registration, not that any particular transition uses it.
+8. To revert, tap **Restore defaults** and restart the launcher or reboot. Confirm the next startup logs `controls off or original`.
 
 Opening the HyperDream app does not verify module activation. The diagnostic message verifies entry-point loading only; it does not establish animation support. Devices with a different launcher package are not targeted by this implementation.
 

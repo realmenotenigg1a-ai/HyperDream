@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HyperDream</string>
-    <string name="module_description">Experimental launcher animation duration control for LSPosed. HyperOS 4 compatibility unverified.</string>
+    <string name="module_description">Experimental launcher animation duration, easing, and delay controls for LSPosed. HyperOS 4 compatibility unverified.</string>
     <string name="tagline">Your animations. Your flow. Your HyperOS.</string>
     <string name="development_status">Early development</string>
-    <string name="status_details">Experimental: change the duration of standard ValueAnimator animations inside the Xiaomi launcher. This may affect more launcher effects than app opening and closing. Spring animations and system-managed transitions are not controlled. HyperOS 4 compatibility is unverified.</string>
+    <string name="status_details">Experimental: change the duration, easing, and optional start delays of standard ValueAnimator animations inside the Xiaomi launcher. This may affect more launcher effects than app opening and closing. Spring animations and system-managed transitions are not controlled. HyperOS 4 compatibility is unverified.</string>
     <string name="setup_heading">Test the module entry point</string>
     <string name="setup_details">1. Install and enable HyperDream in LSPosed.\n\n2. Select only the Xiaomi launcher (com.miui.home) in its scope.\n\n3. Reboot your test device.\n\n4. Check LSPosed logs for the HyperDream diagnostic message.</string>
     <string name="activation_notice">Activation is not detected by this screen. Use LSPosed logs to verify loading. Controls are off by default. A saved setting does not prove an animation was affected.</string>
     <string name="safety_notice">Test on a device you can recover. Disable HyperDream in LSPosed and reboot if problems occur.</string>
-    <string name="enable_duration">Enable experimental duration control</string>
+    <string name="enable_duration">Enable experimental motion controls</string>
     <string name="duration_heading">Duration multiplier (lower is faster)</string>
     <string name="duration_fast">0.5× — Fast</string>
     <string name="duration_quick">0.75× — Quick</string>
     <string name="duration_default">1× — Original duration</string>
     <string name="duration_relaxed">1.5× — Relaxed</string>
     <string name="reset_settings">Restore defaults</string>
-    <string name="restart_notice">Settings save automatically. Reboot after any change, including disabling or restoring defaults. Running launcher animations keep the previous configuration until its process restarts.</string>
+    <string name="restart_notice">Settings save automatically. Restart the launcher or reboot after any change, including disabling or restoring defaults. Running launcher animations keep the previous configuration until its process restarts.</string>
     <string name="settings_saved">Saved. Reboot to apply.</string>
     <string name="brand_edition">MOTION STUDIO · HYPEROS</string>
     <string name="glass_hero">Make every
@@ -26,13 +26,13 @@ move yours.</string>
     <string name="motion_title">Motion lab</string>
     <string name="motion_summary">Tune the rhythm of standard launcher animations. Lower duration means faster motion.</string>
     <string name="play_preview">Play local preview</string>
-    <string name="preview_notice">Illustration only. Uses your selected duration even when the module control is off. It does not mirror HyperOS transitions or require LSPosed.</string>
+    <string name="preview_notice">Illustration only. Uses selected duration, easing, and delay settings even when the module control is off. Original easing uses demonstration curves, not the HyperOS curves. This is not a launcher compatibility test.</string>
     <string name="preview_accessibility">Illustration of an app opening from an icon and returning to the home screen. Use Play local preview to animate.</string>
     <string name="preview_reduced_motion">System animations are disabled. Showing a still preview.</string>
     <string name="config_off">Saved configuration: off. Launcher activation not checked.</string>
-    <string name="config_original">Saved configuration: enabled at 1×. No duration hook needed.</string>
-    <string name="config_enabled">Saved configuration: enabled at %1$s×. Activation not checked.</string>
-    <string name="config_saved">%1$s Reboot to apply.</string>
+    <string name="config_original">Saved configuration: enabled with original timing and easing. No animation overrides needed.</string>
+    <string name="config_enabled">Saved configuration: duration %1$s×, easing %2$s, delays %3$s. Activation not checked.</string>
+    <string name="config_saved">%1$s Restart launcher or reboot to apply.</string>
     <string name="features_title">Beyond motion</string>
     <string name="features_intro">Home Up-inspired direction, not feature parity. Everything below is planned and unavailable. There are no hidden working controls here.</string>
     <string name="feature_home_title">Home screen · Planned</string>
@@ -44,11 +44,37 @@ move yours.</string>
     <string name="feature_gestures_title">Gestures · Planned</string>
     <string name="feature_gestures_body">Home gesture behavior, swipe response, and navigation motion. System gesture ownership and safe hook points must be investigated.</string>
     <string name="feature_motion_title">Advanced animation · Planned</string>
-    <string name="feature_motion_body">Spring tuning, custom curves, app-return effects, and per-app profiles. The current hook only scales standard ValueAnimator durations.</string>
+    <string name="feature_motion_body">Private spring tuning, custom curve editing, app-return effects, and per-app profiles remain planned. Preset easing for standard ValueAnimator calls is now in Motion lab.</string>
     <string name="feature_sharing_title">Layouts and sharing · Research needed</string>
     <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
     <string name="glass_disclaimer">Glass-inspired styling, not live optical blur.
 Independent project. Not affiliated with Xiaomi or Samsung.</string>
+    <string name="curve_heading">Easing curve</string>
+    <string name="curve_system">Original — preserve launcher easing</string>
+    <string name="curve_smooth">Smooth — balanced ease in and out</string>
+    <string name="curve_emphasized">Liquid glide — quick start, soft landing</string>
+    <string name="curve_linear">Linear — constant pace</string>
+    <string name="curve_notice">These are real launcher-local ValueAnimator hooks, not just preview controls. They only affect explicit setter calls. They do not tune private HyperOS spring engines, icon size, or system-managed transitions.</string>
+    <string name="scale_delays">Scale animation start delays too</string>
+    <string name="delay_scaled">scaled</string>
+    <string name="delay_original">original</string>
+    <string name="restart_launcher">Restart Xiaomi launcher</string>
+    <string name="restart_confirm_button">Restart with root</string>
+    <string name="restart_confirmation">This requests root access to force-stop and reopen Xiaomi System Launcher (com.miui.home) for the current user. It will return you to Home and interrupt launcher activity. No app data is cleared. Only the owner profile with Xiaomi launcher as default is supported. Save your work first. This does not verify animation compatibility.</string>
+    <string name="restart_explanation">Optional root-only shortcut, never automatic. Confirm each restart and grant root if prompted. Reboot manually if root access is unavailable.</string>
+    <string name="restart_running">Waiting for root / restarting (up to 30 seconds)…</string>
+    <string name="restart_completed">Restart command completed. Check LSPosed logs to confirm the module loaded and test actual animations; compatibility is not verified.</string>
+    <string name="restart_no_root">Could not start the root command or access its temporary output. Check your root manager. Reboot manually to apply settings.</string>
+    <string name="restart_failed">Root was denied or the restart command failed. Check your root manager and default launcher. Reboot manually if necessary.</string>
+    <string name="restart_timeout">Restart timed out. Do not assume settings applied. Check Home and root authorization, or reboot manually.</string>
+    <string name="restart_not_default">Restart refused: Xiaomi System Launcher must be the default Home app.</string>
+    <string name="restart_profile">Restart refused: this shortcut only supports the owner/system user, not work or secondary profiles.</string>
+    <string name="restart_busy">A restart is already running. Wait before trying again.</string>
+    <string name="restart_save_failed">Settings could not be flushed to storage. No restart was attempted.</string>
+    <string name="launcher_not_installed">Xiaomi launcher is not installed or is unavailable in this profile.</string>
+    <string name="device_heading">Device and compatibility</string>
+    <string name="device_report">Device: %1$s %2$s\nAndroid: %3$s (API %4$s)\nOS incremental build: %5$s\nXiaomi launcher: %6$s\nHyperOS compatibility: NOT VERIFIED. Build information is not certification. Share your full HyperOS version and launcher APK for investigation.</string>
+    <string name="copy_diagnostics">Copy build details</string>
     <string-array name="xposed_scope">
         <item>com.miui.home</item>
     </string-array>
