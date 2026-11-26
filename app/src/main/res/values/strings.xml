@@ -18,6 +18,37 @@
     <string name="reset_settings">Restore defaults</string>
     <string name="restart_notice">Settings save automatically. Reboot after any change, including disabling or restoring defaults. Running launcher animations keep the previous configuration until its process restarts.</string>
     <string name="settings_saved">Saved. Reboot to apply.</string>
+    <string name="brand_edition">MOTION STUDIO · HYPEROS</string>
+    <string name="glass_hero">Make every
+move yours.</string>
+    <string name="glass_subtitle">A calmer space to shape your launcher. Glass-inspired surfaces. Motion with intention.</string>
+    <string name="experimental_badge">EXPERIMENTAL · DEVICE TESTING NEEDED</string>
+    <string name="motion_title">Motion lab</string>
+    <string name="motion_summary">Tune the rhythm of standard launcher animations. Lower duration means faster motion.</string>
+    <string name="play_preview">Play local preview</string>
+    <string name="preview_notice">Illustration only. Uses your selected duration even when the module control is off. It does not mirror HyperOS transitions or require LSPosed.</string>
+    <string name="preview_accessibility">Illustration of an app opening from an icon and returning to the home screen. Use Play local preview to animate.</string>
+    <string name="preview_reduced_motion">System animations are disabled. Showing a still preview.</string>
+    <string name="config_off">Saved configuration: off. Launcher activation not checked.</string>
+    <string name="config_original">Saved configuration: enabled at 1×. No duration hook needed.</string>
+    <string name="config_enabled">Saved configuration: enabled at %1$s×. Activation not checked.</string>
+    <string name="config_saved">%1$s Reboot to apply.</string>
+    <string name="features_title">Beyond motion</string>
+    <string name="features_intro">Home Up-inspired direction, not feature parity. Everything below is planned and unavailable. There are no hidden working controls here.</string>
+    <string name="feature_home_title">Home screen · Planned</string>
+    <string name="feature_home_body">Grid and dock sizing, icon scale and labels, spacing, and free placement. Requires version-specific launcher research.</string>
+    <string name="feature_folders_title">Folders · Planned</string>
+    <string name="feature_folders_body">Folder grids, popup sizing, appearance, and opening motion. No folder hooks are installed.</string>
+    <string name="feature_recents_title">Task switcher · Planned</string>
+    <string name="feature_recents_body">Recents layouts, card sizing, labels, and switching behavior. May require components outside the current launcher-only scope.</string>
+    <string name="feature_gestures_title">Gestures · Planned</string>
+    <string name="feature_gestures_body">Home gesture behavior, swipe response, and navigation motion. System gesture ownership and safe hook points must be investigated.</string>
+    <string name="feature_motion_title">Advanced animation · Planned</string>
+    <string name="feature_motion_body">Spring tuning, custom curves, app-return effects, and per-app profiles. The current hook only scales standard ValueAnimator durations.</string>
+    <string name="feature_sharing_title">Layouts and sharing · Research needed</string>
+    <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
+    <string name="glass_disclaimer">Glass-inspired styling, not live optical blur.
+Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string-array name="xposed_scope">
         <item>com.miui.home</item>
     </string-array>

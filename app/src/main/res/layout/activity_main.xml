@@ -1,156 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#10131D"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true">
+    android:background="@drawable/glass_backdrop">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
-        <ImageView
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_marginBottom="20dp"
-            android:contentDescription="@null"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_launcher" />
-
-        <TextView
+        <LinearLayout
+            android:id="@+id/card_stack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="#FFFFFF"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:paddingBottom="32dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/tagline"
-            android:textColor="#B9C4DD"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/development_status"
-            android:textColor="#91FF00"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/status_details"
-            android:textColor="#E0E5F0"
-            android:textSize="16sp" />
-
-        <Switch
-            android:id="@+id/enable_duration"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/enable_duration"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:labelFor="@id/duration_presets"
-            android:text="@string/duration_heading"
-            android:textColor="#E0E5F0"
-            android:textSize="16sp" />
-
-        <RadioGroup
-            android:id="@+id/duration_presets"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/duration_fast"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/duration_fast" />
-            <RadioButton
-                android:id="@+id/duration_quick"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="12dp"
+                android:paddingBottom="16dp">
+
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="14dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_launcher" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/GlassTitle"
+                        android:text="@string/app_name"
+                        android:textSize="28sp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:letterSpacing="0.12"
+                        android:text="@string/brand_edition"
+                        android:textColor="@color/mint"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/duration_quick" />
-            <RadioButton
-                android:id="@+id/duration_default"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/duration_default" />
-            <RadioButton
-                android:id="@+id/duration_relaxed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/duration_relaxed" />
-        </RadioGroup>
+                android:accessibilityHeading="true"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/glass_hero"
+                android:textColor="@color/text_primary"
+                android:textSize="38sp" />
+            <TextView style="@style/GlassBody" android:text="@string/glass_subtitle" />
 
-        <Button
-            android:id="@+id/reset_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:text="@string/reset_settings" />
+            <LinearLayout style="@style/GlassCard">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/status_pill"
+                    android:text="@string/experimental_badge"
+                    android:textColor="@color/mint"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/configuration_status"
+                    style="@style/GlassBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/config_off"
+                    android:textColor="@color/text_primary" />
+                <TextView style="@style/GlassBody" android:text="@string/activation_notice" />
+            </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:accessibilityLiveRegion="polite"
-            android:text="@string/restart_notice"
-            android:textColor="#FFD69C"
-            android:textSize="14sp" />
+            <include layout="@layout/card_motion" />
+            <include layout="@layout/card_features" />
+            <include layout="@layout/card_setup" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="@string/setup_heading"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/setup_details"
-            android:textColor="#E0E5F0"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/activation_notice"
-            android:textColor="#B9C4DD"
-            android:textSize="14sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/safety_notice"
-            android:textColor="#FFD69C"
-            android:textSize="14sp" />
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                style="@style/GlassBody"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="@string/glass_disclaimer"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

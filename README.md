@@ -69,6 +69,14 @@ The first experimental control changes durations passed to **Android `ValueAnima
 - **Restricted scope** — only `com.miui.home`, with an additional main-process check in code.
 - **Failure fallback** — if settings cannot be read, the animation hook is not installed.
 
+### Glass-inspired motion studio
+
+The settings app now uses a blue/teal gradient backdrop, translucent rounded cards, edge highlights, and ripple controls. This is a **liquid-glass-inspired visual treatment**, not live background blur or optical refraction.
+
+A replayable local motion illustration shows the selected duration preset without requiring LSPosed. It is labeled as an illustration and works even when the module control is off. Its easing does not change the launcher. Entry transitions and preview playback respect the system animation-off setting, and playback stops when the app leaves the foreground.
+
+The in-app **Beyond motion** section lists planned home-screen, folder, recents, gesture, advanced-animation, and layout/sharing work. Those are not working controls. See the [feature scope and implementation gates](docs/FEATURES.md); this is not a claim that every Home Up feature has been implemented or is possible on HyperOS.
+
 ### Limitations
 
 This is **not yet a Home Up equivalent**. It has not been verified on a HyperOS 4 device. It only affects durations explicitly passed through `ValueAnimator.setDuration` after initialization; it does not override default durations that never use that setter. ObjectAnimator calls delegating to that API can be affected too.

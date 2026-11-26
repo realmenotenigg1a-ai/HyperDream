@@ -2,8 +2,57 @@
 <resources>
     <style name="Theme.HyperDream" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#91FF00</item>
+        <item name="android:colorAccent">@color/mint</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowBackground">#10131D</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">@color/ink</item>
+        <item name="android:navigationBarColor">@color/ink</item>
+        <item name="android:statusBarColor">@color/ink</item>
+    </style>
+    <style name="GlassCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:padding">22dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/glass_panel</item>
+    </style>
+    <style name="GlassTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:accessibilityHeading">true</item>
+    </style>
+    <style name="GlassBody">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+    </style>
+    <style name="GlassButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:background">@drawable/glass_button</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+    <style name="DurationOption">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
     </style>
 </resources>

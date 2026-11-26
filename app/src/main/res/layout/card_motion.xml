@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/GlassCard">
+    <TextView style="@style/GlassTitle" android:text="@string/motion_title" />
+    <TextView style="@style/GlassBody" android:text="@string/motion_summary" />
+    <io.github.hyperdream.module.MotionPreviewView
+        android:id="@+id/motion_preview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/preview_accessibility"
+        android:importantForAccessibility="yes" />
+    <Button
+        android:id="@+id/play_preview"
+        style="@style/GlassButton"
+        android:text="@string/play_preview" />
+    <TextView style="@style/GlassBody" android:text="@string/preview_notice" android:textSize="13sp" />
+    <Switch
+        android:id="@+id/enable_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:minHeight="56dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/enable_duration"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp" />
+    <TextView style="@style/GlassBody" android:labelFor="@id/duration_presets" android:text="@string/duration_heading" />
+    <RadioGroup
+        android:id="@+id/duration_presets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+        <RadioButton android:id="@+id/duration_fast" style="@style/DurationOption" android:text="@string/duration_fast" />
+        <RadioButton android:id="@+id/duration_quick" style="@style/DurationOption" android:text="@string/duration_quick" />
+        <RadioButton android:id="@+id/duration_default" style="@style/DurationOption" android:text="@string/duration_default" />
+        <RadioButton android:id="@+id/duration_relaxed" style="@style/DurationOption" android:text="@string/duration_relaxed" />
+    </RadioGroup>
+    <Button android:id="@+id/reset_settings" style="@style/GlassButton" android:text="@string/reset_settings" />
+    <TextView style="@style/GlassBody" android:text="@string/restart_notice" android:textColor="@color/warning" android:textSize="13sp" />
+</LinearLayout>

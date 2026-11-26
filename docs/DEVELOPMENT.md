@@ -62,3 +62,17 @@ For recovery, disable HyperDream through LSPosed and reboot. Prepare the recover
 ## Future HyperOS-specific work
 
 Inspect an actual target launcher APK and document the class/method signatures and tested versions before adding private hooks. Keep unsupported signatures as safe no-ops with actionable diagnostics. Do not broaden scope to System Framework or System UI to make a launcher-specific feature work. Any later settings change must preserve off-by-default behavior and a tested restoration route.
+
+## Settings UI and motion
+
+The Android settings app is part of the LSPosed APK, not a separate requirement to convert the module into an app. `MainActivity` edits real duration settings and renders a roadmap for features that are not implemented.
+
+- `glass_backdrop.xml` and `glass_panel.xml` provide static gradients, translucent fills, and highlights. There is no expensive continuously running blur, optical shader, or live wallpaper sampling.
+- `MotionPreviewView` draws an abstract desktop and animates a local icon/card pair. It uses the selected duration but intentionally ignores the enable switch, as labeled in the interface. It never calls the launcher or validates hook activation.
+- `ValueAnimator.areAnimatorsEnabled()` skips entry motion and substitutes a still preview when global animation duration scale is zero. Standard Android animation scaling otherwise applies to in-app playback.
+- Entry animations are staggered once on a fresh Activity creation. `onStop` cancels them, restores visible card state, removes pending entry callbacks, and stops preview playback; view detachment also stops playback. There is no perpetual animation loop.
+- Window insets include system bars and display cutouts. Text uses scalable units, cards wrap content, controls have at least 48dp targets, and preview artwork has a content description. The interface still needs physical-device verification at large font scales and with TalkBack.
+
+UI smoke tests: rotate while previewing; background/reopen during entry and playback; replay repeatedly; change presets during playback; restore defaults; set system animation duration to zero; try gesture and three-button navigation; test landscape, a narrow display, 200% font scaling, and a screen reader. No card should remain transparent, no animation should continue in the background, and local previewing must not modify stored enable state or install launcher hooks.
+
+See [Feature scope](FEATURES.md) for the nonfunctional roadmap and prerequisites for future Home Up-inspired controls.

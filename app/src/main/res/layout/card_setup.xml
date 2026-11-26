@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/GlassCard">
+    <TextView style="@style/GlassTitle" android:text="@string/setup_heading" />
+    <TextView style="@style/GlassBody" android:text="@string/setup_details" />
+    <TextView style="@style/GlassBody" android:text="@string/status_details" />
+    <TextView style="@style/GlassBody" android:layout_marginTop="20dp" android:text="@string/safety_notice" android:textColor="@color/warning" />
+</LinearLayout>
