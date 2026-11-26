@@ -8,7 +8,7 @@
 
 An animation-customization module targeting **Xiaomi HyperOS 4**, inspired by the home-screen customization experience of **Samsung Home Up**.
 
-**Status: Early development · LSPosed scaffold · No animation hooks yet**
+**Status: Early development · Experimental LSPosed duration control · Device testing needed**
 
 </div>
 
@@ -51,55 +51,68 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [x] Document the project vision and initial feature goals.
 - [ ] Investigate the target system and launcher's animation behavior.
 - [x] Select LSPosed and add the basic Android module scaffold.
-- [ ] Build a minimal animation-customization prototype.
-- [ ] Add a settings interface and animation controls.
-- [ ] Implement default restoration and document recovery steps.
+- [x] Implement an opt-in launcher ValueAnimator duration prototype (device verification pending).
+- [x] Add duration presets, an enable switch, and a restore-defaults action.
+- [x] Implement disabled-by-default settings and document basic recovery guidance.
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
 ## Current implementation
 
-- A Java Android app with the HyperDream icon and an informational launcher screen.
-- Classic Xposed module metadata and an `assets/xposed_init` entry point for LSPosed.
-- Recommended scope limited to **Xiaomi System Launcher (`com.miui.home`)**.
-- An additional in-code package/process allowlist: only the launcher's main process logs a diagnostic message.
-- No animation hooks, system setting changes, network permissions, or activation-status claims.
-- Unit tests for the allowlist and a GitHub Actions workflow for tests, lint, and a debug APK build.
+The first experimental control changes durations passed to **Android `ValueAnimator.setDuration(long)` inside the Xiaomi launcher's main process**. It does not change global animation scales or other apps' processes.
 
-The app's Android 12+ minimum SDK is a scaffold baseline, **not** a claim of HyperOS compatibility. This project uses the classic Xposed API rather than the modern libxposed API.
+- **Off by default** — enable the control explicitly in the HyperDream app.
+- **Duration presets** — 0.5× (fast), 0.75× (quick), 1× (original), and 1.5× (relaxed). These multiply duration, not speed.
+- **Restore defaults** — disables the control and resets the multiplier to 1×.
+- **Reboot to apply** — settings are read once at launcher startup. Disabling or resetting also requires a reboot to remove the previous process's hook.
+- **Read-only settings bridge** — app-private preferences are exposed only to the module's own UID and the Xiaomi launcher's UID; remote writes are not supported.
+- **Restricted scope** — only `com.miui.home`, with an additional main-process check in code.
+- **Failure fallback** — if settings cannot be read, the animation hook is not installed.
+
+### Limitations
+
+This is **not yet a Home Up equivalent**. It has not been verified on a HyperOS 4 device. It only affects durations explicitly passed through `ValueAnimator.setDuration` after initialization; it does not override default durations that never use that setter. ObjectAnimator calls delegating to that API can be affected too.
+
+The control may change multiple launcher effects, not just app open/close animations. Private spring engines, render-thread animations, system-managed remote transitions, and animations in other processes may not be affected at all. Custom curves, spring parameters, per-app controls, recents styles, and a live preview are not implemented.
+
+The app's Android 12+ minimum SDK is a development baseline, **not** a claim of HyperOS compatibility. This project uses the classic Xposed API rather than the modern libxposed API. The settings screen reports saved configuration, not verified module activation or effective animation behavior.
 
 ## Build
 
-Requirements: **JDK 17**, Android SDK Platform **35**, Android SDK Build-Tools **35.0.0**, and internet access to the configured Gradle/Maven repositories. Android Studio can install the SDK components.
+Requirements: **JDK 17 or 21**, Android SDK Platform **35**, Android SDK Build-Tools **35.0.0**, and internet access to the configured Gradle/Maven repositories. Android Studio can install the SDK components.
 
 ```sh
 # Configure the SDK through Android Studio, ANDROID_HOME, or local.properties.
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-On Windows, use `gradlew.bat`. The Gradle 8.9 wrapper is included. The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+On Windows, use `gradlew.bat`. The Gradle 8.9 wrapper is included. CI uses JDK 21 for current Android SDK tools. The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
 GitHub Actions runs the same checks and uploads a `HyperDream-debug` artifact after a successful build. An artifact is a development build, not a verified compatible release.
 
 See [Development notes](docs/DEVELOPMENT.md) for the project layout, verification steps, and boundaries for future hooks.
 
-## Install and verify the scaffold
+## Install and test the experimental control
 
-There is **no published release yet**, and this scaffold has not been verified on a HyperOS 4 device.
+There is **no published release yet**, and this implementation has not been verified on a HyperOS 4 device.
 
 1. Build the debug APK and install it on a recoverable test device with a compatible LSPosed installation.
 2. Enable **HyperDream** in LSPosed.
 3. Select only **Xiaomi System Launcher (`com.miui.home`)** in the module scope. Do not add System Framework or System UI.
 4. Reboot the device and open the launcher.
-5. Check LSPosed logs for:
+5. With settings still off, check LSPosed logs for:
 
    ```text
-   [HyperDream] Loaded in com.miui.home main process; diagnostic scaffold only, no animation hooks installed.
+   [HyperDream] Loaded in com.miui.home main process.
    ```
 
-Opening the HyperDream app does not verify module activation. The diagnostic message verifies entry-point loading only; it does not establish animation support. Devices with a different launcher package are not targeted by this scaffold.
+6. Open HyperDream, choose a duration preset such as **0.75×**, and enable experimental duration control.
+7. Reboot. Look for `[HyperDream] Launcher ValueAnimator duration hook installed; scale=0.75` in LSPosed logs, then test launcher behavior. That log only confirms hook registration, not that any particular transition uses it.
+8. To revert, tap **Restore defaults** and reboot. Confirm that the next startup logs that duration control is off or 1×.
 
-To remove the scaffold, disable HyperDream in LSPosed, reboot, and uninstall the app. If the launcher is inaccessible, use your LSPosed/root solution's documented module-disabling recovery procedure; the steps depend on that installation. Prepare and test that recovery path before experimenting.
+Opening the HyperDream app does not verify module activation. The diagnostic message verifies entry-point loading only; it does not establish animation support. Devices with a different launcher package are not targeted by this implementation.
+
+To remove the module, disable HyperDream in LSPosed, reboot, and uninstall the app. If the launcher is inaccessible, use your LSPosed/root solution's documented module-disabling recovery procedure; the steps depend on that installation. Prepare and test that recovery path before experimenting.
 
 **Install the APK normally. Do not flash this repository, its source archive, or the APK as a Magisk/KernelSU ZIP.**
 

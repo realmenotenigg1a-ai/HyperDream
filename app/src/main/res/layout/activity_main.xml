@@ -53,6 +53,73 @@
             android:textColor="#E0E5F0"
             android:textSize="16sp" />
 
+        <Switch
+            android:id="@+id/enable_duration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/enable_duration"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:labelFor="@id/duration_presets"
+            android:text="@string/duration_heading"
+            android:textColor="#E0E5F0"
+            android:textSize="16sp" />
+
+        <RadioGroup
+            android:id="@+id/duration_presets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/duration_fast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/duration_fast" />
+            <RadioButton
+                android:id="@+id/duration_quick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/duration_quick" />
+            <RadioButton
+                android:id="@+id/duration_default"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/duration_default" />
+            <RadioButton
+                android:id="@+id/duration_relaxed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/duration_relaxed" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/reset_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/reset_settings" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:accessibilityLiveRegion="polite"
+            android:text="@string/restart_notice"
+            android:textColor="#FFD69C"
+            android:textSize="14sp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
