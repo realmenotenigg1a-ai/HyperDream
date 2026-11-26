@@ -18,3 +18,10 @@ for path in Path("app/build/reports").glob("lint-results-*.xml"):
     for issue in ET.parse(path).getroot().findall("issue"):
         if issue.get("severity") in ("Error", "Fatal"):
             report(f"Lint {issue.get('id')}: {issue.get('message')}")
+
+# Compilation and dependency failures happen before any test/lint XML is written.
+log = Path("android-build.log")
+if log.exists():
+    lines = log.read_text(errors="replace").splitlines()[-90:]
+    for start in range(0, len(lines), 30):
+        report("Build log tail:\n" + "\n".join(lines[start:start + 30]))
