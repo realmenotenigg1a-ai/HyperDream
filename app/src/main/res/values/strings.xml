@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HyperDream</string>
+    <string name="module_description">Experimental HyperOS animation customization. Diagnostic scaffold only; no animation changes yet.</string>
+    <string name="tagline">Your animations. Your flow. Your HyperOS.</string>
+    <string name="development_status">Early development</string>
+    <string name="status_details">This build contains the LSPosed module entry point. Animation controls are not implemented yet. HyperOS 4 compatibility has not been verified.</string>
+    <string name="setup_heading">Test the module entry point</string>
+    <string name="setup_details">1. Install and enable HyperDream in LSPosed.\n\n2. Select only the Xiaomi launcher (com.miui.home) in its scope.\n\n3. Reboot your test device.\n\n4. Check LSPosed logs for the HyperDream diagnostic message.</string>
+    <string name="activation_notice">Activation is not detected by this screen. Use LSPosed logs to verify loading. This build does not change animations.</string>
+    <string name="safety_notice">Test on a device you can recover. Disable HyperDream in LSPosed and reboot if problems occur.</string>
+    <string-array name="xposed_scope">
+        <item>com.miui.home</item>
+    </string-array>
+</resources>
