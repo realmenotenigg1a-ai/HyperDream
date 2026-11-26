@@ -89,15 +89,25 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="spring_reset">Disable and reset springs</string>
     <string name="spring_compatibility">Requires the exact Java SpringParamsProvider API. Stock HyperOS 4 may use a native launcher without this API. In that case LSPosed cannot apply this adapter; no effect is promised. Do not install an unknown replacement launcher just to try it.</string>
     <string name="refresh_hooks">Refresh launcher report</string>
-    <string name="report_none">No launcher spring report received. Enable the module for Xiaomi Launcher and restart/reboot, then refresh. Missing reports do not prove the launcher API is supported.</string>
+    <string name="report_none">No launcher spring report received. Enable the module for Xiaomi Launcher and restart/reboot, then refresh. Missing reports do not prove the launcher API is supported. Check Device → Launcher runtime evidence for native-library indicators.</string>
     <string name="report_disabled">Spring override was disabled at startup</string>
     <string name="report_unsupported">Java spring API missing or signature unsupported — spring overrides not installed</string>
-    <string name="report_registered">Spring hook registered — not yet observed changing parameters</string>
+    <string name="report_registered">Spring hook registered — inspect observed call count below; registration alone does not mean the transition uses it</string>
     <string name="report_applied">Spring hook intercepted a supported call and replaced parameters — visual behavior still needs testing</string>
     <string name="report_failed">Spring adapter stopped after unexpected data — original results preserved for that call and future calls</string>
     <string name="report_historical">Historical report, not a live process check. Reboot/restart may make it stale.</string>
     <string name="report_stale">Different settings or module build: restart launcher and refresh. This report does not describe the current configuration.</string>
     <string name="report_details">%1$s\n\nReported: %2$s\nLauncher-loaded module: %3$s\n%4$s</string>
+    <string name="diagnostic_protocol">Diagnostic test: restart/reboot with spring overrides enabled, open and close apps several times, then wait at least 60 seconds. Refresh reads the last stored snapshot, not a live counter. Copy build details from Device and paste the text; no APK upload is needed.</string>
+    <string name="report_observed">Spring provider was called, but no supported nonempty bundle has been replaced. See call counts, enum types, and outcomes below.</string>
+    <string name="runtime_heading">Launcher runtime evidence</string>
+    <string name="runtime_pending">Reading installed launcher ZIP metadata locally… No root or upload is needed.</string>
+    <string name="runtime_flutter_indicators">Flutter/native library indicators found. HyperDream currently installs Java hooks only, not HyperOS Runtime/native hooks. A Java method can register but remain unused by native transitions. Library presence alone does not prove every transition is native.</string>
+    <string name="runtime_no_indicators">No complete Flutter library pair was found in the APK paths checked. This does not establish a Java-only runtime or hook compatibility.</string>
+    <string name="runtime_no_evidence">No matching ZIP entries observed.</string>
+    <string name="runtime_scan_complete">Base and accessible split APK paths checked. ZIP names/sizes/CRC32 are diagnostic metadata, not signature verification. No libraries were extracted, executed, or uploaded.</string>
+    <string name="runtime_scan_partial">Inspection was incomplete or a path was unreadable. Do not treat missing library entries as evidence that native code is absent.</string>
+    <string name="runtime_unavailable">Installed launcher runtime metadata is unavailable. No native/Java compatibility conclusion can be drawn.</string>
     <string-array name="xposed_scope">
         <item>com.miui.home</item>
     </string-array>

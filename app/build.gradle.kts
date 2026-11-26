@@ -11,8 +11,8 @@ android {
         applicationId = "io.github.hyperdream.module"
         minSdk = 31
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.5.0-dev"
+        versionCode = 6
+        versionName = "0.6.0-diagnostic"
         val revision = providers.environmentVariable("GITHUB_SHA").map { it.take(8) }.getOrElse("local")
         buildConfigField("String", "BUILD_ID", "\"$revision\"")
     }

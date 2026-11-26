@@ -57,6 +57,20 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.6 diagnostic: investigate registered-but-unused hooks
+
+This build does **not** claim to fix native HyperOS 4 transitions. It adds evidence needed when the Java hook registers but no effect is observed:
+
+- Bounded counts for actual provider callbacks, filtered enum types, original exceptions, empty results, replacements, and adapter failures.
+- Declared and observed animation enum names; no coordinates, screenshots, or app contents.
+- Sampled reports plus one snapshot at 15 seconds and one at 60 seconds, including an explicit zero-call count if the method is never used. Refresh reads the last stored snapshot; it does not invoke a launcher method or prove liveness.
+- Null/empty bundles are preserved without disabling later valid calls.
+- Read-only base/split APK ZIP metadata inspection for Flutter/native library indicators, off the UI thread and without root, extraction, execution, or upload.
+
+The user-supplied download page identifies version `801030308`, but the APK could not be retrieved for inspection. Public development reports describe a native HyperOS Runtime path for that exact version; these are third-party reports, not verification of the installed APK. See [the investigation and diagnostic protocol](docs/REGISTERED-NOT-APPLIED.md).
+
+To help without uploading an APK: enable spring overrides, restart/reboot, exercise app opening/closing, wait at least 60 seconds, refresh the Spring report, then use **Device → Copy build details** and paste the resulting text. Device details include the runtime-library evidence and last hook snapshot. If the copy says inspection is still pending, wait and copy again.
+
 ## v0.5: Java spring adapter and identifiable builds
 
 The **Spring** tab now has independent damping and response controls connected to a guarded Java `SpringParamsProvider` hook for app open-from-home / close-to-home transitions. This is different from the generic Animator tab's speed/easing controls.

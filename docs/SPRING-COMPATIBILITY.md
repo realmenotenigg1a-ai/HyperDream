@@ -39,7 +39,7 @@ This is a **signature guard**, not a tested-build allowlist. Matching names and 
 - Original keys and impulses are preserved. An entirely new typed array of new parameter objects is constructed; launcher-owned objects are not mutated.
 - Disabled by default. Missing/corrupt settings fall back to disabled. Reset disables spring overrides and resets both numeric controls to 1; restart/reboot removes the previous process's override.
 
-Unknown parameter shape, array lengths outside 1–64, nonfinite inputs, or out-of-range response values reject the whole replacement. No partial result is returned. The callback then stops applying overrides for the remainder of that launcher process and reports failure. This is not a general crash-loop detector or a guarantee against visual regressions.
+Null/empty bundles are preserved as normal absent results without disabling later calls. Unknown parameter shape, nonempty arrays larger than 64, nonfinite inputs, or out-of-range response values reject the whole replacement. No partial result is returned. The callback then stops applying overrides for the remainder of that launcher process and reports failure. This is not a general crash-loop detector or a guarantee against visual regressions.
 
 ## Reports, not fake activation badges
 
@@ -50,7 +50,8 @@ The launcher reports through the settings provider. Reports are accepted only fr
 | No report | No authenticated report was received; scope/startup/provider access may be wrong |
 | Disabled | Launcher read spring settings as disabled |
 | Unsupported | Expected Java API/shape was absent or hook installation failed |
-| Registered | The exact method was hooked; it has not yet been observed replacing a supported result |
+| Registered | The exact method was hooked; observed callback count is zero at this snapshot |
+| Observed | Callbacks occurred but returned original exceptions, filtered types, invalid arguments, or null/empty bundles without a replacement |
 | Applied | The callback intercepted a supported type and supplied a complete replacement array |
 | Failed | Unexpected runtime data caused the adapter to stop applying overrides in that process |
 
@@ -61,3 +62,7 @@ The launcher reports through the settings provider. Reports are accepted only fr
 CI tests validate the adapter against small structural fixtures, range checks, all-or-nothing copying, settings persistence/reset, report authorization, and UI navigation. They do not execute real Xposed interception or a real launcher.
 
 For actual HyperOS 4 support, supply the full OS build, launcher version/APK, LSPosed version, and a recoverable test device. Verify the API exists, whether transition paths call it, what units/fields mean, the visible effect, reset, and safe recovery. Native-only implementations require a different technical approach and are not supported by this adapter.
+
+## Registered-but-unused investigation
+
+v0.6 adds bounded invocation counters, declared/observed enum names, staged installation failure reasons, two one-off delayed snapshots, and an independent read-only native-library metadata probe. See [the diagnostic protocol](REGISTERED-NOT-APPLIED.md). A Flutter library pair is an indicator, not proof every animation is native. The module still does not provide a native HyperOS Runtime entry point or Dart/ARM64 hooks.

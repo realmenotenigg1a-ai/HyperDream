@@ -30,6 +30,7 @@
     <TextView style="@style/GlassBody" android:text="@string/spring_values_notice" android:textSize="13sp" />
     <Button android:id="@+id/reset_spring" style="@style/GlassButton" android:text="@string/spring_reset" />
     <TextView style="@style/GlassBody" android:text="@string/spring_compatibility" android:textColor="@color/warning" />
+    <TextView style="@style/GlassBody" android:text="@string/diagnostic_protocol" android:textSize="13sp" />
     <Button android:id="@+id/refresh_hooks" style="@style/GlassButton" android:text="@string/refresh_hooks" />
     <TextView
         android:id="@+id/hook_report"

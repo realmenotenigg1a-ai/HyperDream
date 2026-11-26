@@ -40,12 +40,14 @@ final class SpringParamAdapter {
         if (!settings.enabled) {
             return original;
         }
-        if (original == null || !original.getClass().isArray()
+        if (original == null) { return null; }
+        if (!original.getClass().isArray()
                 || original.getClass().getComponentType() != parameterType) {
             throw new IllegalArgumentException("Unexpected spring bundle type");
         }
         int length = Array.getLength(original);
-        if (length == 0 || length > 64) {
+        if (length == 0) { return original; }
+        if (length > 64) {
             throw new IllegalArgumentException("Unexpected spring bundle size");
         }
         Object replacement = Array.newInstance(parameterType, length);

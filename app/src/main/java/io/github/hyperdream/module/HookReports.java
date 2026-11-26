@@ -20,17 +20,23 @@ final class HookReports {
         return thread;
     });
 
-    enum Status { DISABLED, UNSUPPORTED, REGISTERED, APPLIED, FAILED }
+    enum Status { DISABLED, UNSUPPORTED, REGISTERED, OBSERVED, APPLIED, FAILED }
 
     private HookReports() {}
 
     static void send(Context context, Status status, SpringSettings settings) {
+        send(context, status, settings, "");
+    }
+
+    static void send(Context context, Status status, SpringSettings settings, String diagnostics) {
+        final String boundedDiagnostics = diagnostics.substring(0, Math.min(diagnostics.length(), 2048));
         SENDER.execute(() -> {
             try {
                 Bundle payload = new Bundle();
                 payload.putString("status", status.name());
                 payload.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
                 payload.putString("snapshot", settings.snapshot());
+                payload.putString("diagnostics", boundedDiagnostics);
                 context.getContentResolver().call(Uri.parse("content://" + AnimationSettings.AUTHORITY),
                         METHOD_REPORT, null, payload);
             } catch (RuntimeException ignored) {
@@ -46,11 +52,13 @@ final class HookReports {
         Status status = Status.valueOf(payload.getString("status", ""));
         String build = payload.getString("build", "");
         String snapshot = payload.getString("snapshot", "");
-        if (build.length() > 96 || snapshot.length() > 96) {
+        String diagnostics = payload.getString("diagnostics", "");
+        if (build.length() > 96 || snapshot.length() > 96 || diagnostics.length() > 2048) {
             throw new IllegalArgumentException("Oversized report");
         }
         preferences(context).edit().putString("status", status.name())
                 .putString("build", build).putString("snapshot", snapshot)
+                .putString("diagnostics", diagnostics)
                 .putLong("time", System.currentTimeMillis()).apply();
     }
 
@@ -71,6 +79,7 @@ final class HookReports {
             case DISABLED: label = R.string.report_disabled; break;
             case UNSUPPORTED: label = R.string.report_unsupported; break;
             case REGISTERED: label = R.string.report_registered; break;
+            case OBSERVED: label = R.string.report_observed; break;
             case APPLIED: label = R.string.report_applied; break;
             default: label = R.string.report_failed;
         }
@@ -80,7 +89,8 @@ final class HookReports {
                 && SettingsStore.readSpring(context).snapshot().equals(prefs.getString("snapshot", ""));
         return context.getString(R.string.report_details, context.getString(label),
                 DateFormat.getDateTimeInstance().format(new Date(timestamp)), build,
-                context.getString(matches ? R.string.report_historical : R.string.report_stale));
+                context.getString(matches ? R.string.report_historical : R.string.report_stale))
+                + "\n\n" + prefs.getString("diagnostics", "");
     }
 
     private static SharedPreferences preferences(Context context) {

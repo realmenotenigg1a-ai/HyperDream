@@ -68,7 +68,7 @@ public final class SpringParamAdapterTest {
     public void rejectsInvalidTypesSizesAndValues() throws Exception {
         SpringParamAdapter adapter = new SpringParamAdapter(Parameter.class);
         SpringSettings settings = new SpringSettings(true, 1, 1);
-        Object[] invalid = {null, new Object[1], new Parameter[0], new Parameter[65],
+        Object[] invalid = {new Object[1], new Parameter[65],
                 new Parameter[]{new Parameter("x", Float.NaN, 1, 0)},
                 new Parameter[]{new Parameter("x", 1, -1, 0)}};
         for (Object input : invalid) {
@@ -99,5 +99,17 @@ public final class SpringParamAdapterTest {
             assertEquals(1f, settings.responseMultiplier, 0f);
             assertEquals(1f, settings.damping, 0f);
         }
+    }
+
+    @Test
+    public void normalAbsentBundleDoesNotPoisonLaterCalls() throws Exception {
+        SpringParamAdapter adapter = new SpringParamAdapter(Parameter.class);
+        SpringSettings settings = new SpringSettings(true, 0.75f, 0.7f);
+        Parameter[] empty = new Parameter[0];
+        assertNull(adapter.copyWithOverrides(null, settings));
+        assertSame(empty, adapter.copyWithOverrides(empty, settings));
+        Parameter[] valid = {new Parameter("width", 1, 0.4f, 0)};
+        Parameter[] adjusted = (Parameter[]) adapter.copyWithOverrides(valid, settings);
+        assertEquals(0.3f, adjusted[0].response, 0.0001f);
     }
 }

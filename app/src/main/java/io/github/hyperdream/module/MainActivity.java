@@ -98,10 +98,19 @@ public final class MainActivity extends Activity {
         findViewById(R.id.play_preview).setOnClickListener(view -> preview.play(selectedScale(), selectedCurve(), scaleDelays.isChecked()));
         TextView details = findViewById(R.id.device_details);
         details.setText(DeviceDiagnostics.describe(this));
+        TextView runtimeDetails = findViewById(R.id.runtime_details);
+        android.content.Context application = getApplicationContext();
+        restartWorker.execute(() -> {
+            String runtime = LauncherRuntimeProbe.describe(application);
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) { runtimeDetails.setText(runtime); }
+            });
+        });
         findViewById(R.id.copy_diagnostics).setOnClickListener(view -> {
             ClipboardManager clipboard = getSystemService(ClipboardManager.class);
             clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name),
-                    DeviceDiagnostics.describe(this) + "\n\n" + HookReports.describe(this)));
+                    DeviceDiagnostics.describe(this) + "\n\n" + runtimeDetails.getText()
+                            + "\n\n" + HookReports.describe(this)));
         });
         findViewById(R.id.restart_launcher).setOnClickListener(view -> new AlertDialog.Builder(this)
                 .setTitle(R.string.restart_launcher)

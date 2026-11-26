@@ -146,4 +146,26 @@ public final class MotionUiTest {
         SettingsStore.writeSpring(activity, new SpringSettings(true, 0.75f, 0.7f));
         assertTrue(HookReports.describe(activity).contains(activity.getString(R.string.report_stale)));
     }
+
+    @Test
+    public void observedStatusIncludesCopyableInvocationEvidence() {
+        Bundle report = new Bundle();
+        report.putString("status", "OBSERVED");
+        report.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
+        report.putString("snapshot", new SpringSettings(false, 1, 1).snapshot());
+        report.putString("diagnostics", "Provider calls: 3; filtered: OPEN_FROM_RECENTS");
+        HookReports.record(activity, report);
+        String description = HookReports.describe(activity);
+        assertTrue(description.contains(activity.getString(R.string.report_observed)));
+        assertTrue(description.contains("OPEN_FROM_RECENTS"));
+        assertNotNull(activity.findViewById(R.id.runtime_details));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void oversizedDiagnosticsAreRejectedWithoutChangingSettings() {
+        Bundle report = new Bundle();
+        report.putString("status", "OBSERVED");
+        report.putString("diagnostics", "x".repeat(2049));
+        HookReports.record(activity, report);
+    }
 }

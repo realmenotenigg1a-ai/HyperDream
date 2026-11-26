@@ -8,6 +8,13 @@
         android:id="@+id/device_details"
         style="@style/GlassBody"
         android:textIsSelectable="true" />
+    <TextView style="@style/GlassTitle" android:layout_marginTop="24dp" android:text="@string/runtime_heading" />
+    <TextView
+        android:id="@+id/runtime_details"
+        style="@style/GlassBody"
+        android:accessibilityLiveRegion="polite"
+        android:textIsSelectable="true"
+        android:text="@string/runtime_pending" />
     <Button android:id="@+id/copy_diagnostics" style="@style/GlassButton" android:text="@string/copy_diagnostics" />
     <TextView style="@style/GlassBody" android:layout_marginTop="20dp" android:text="@string/safety_notice" android:textColor="@color/warning" />
 </LinearLayout>
