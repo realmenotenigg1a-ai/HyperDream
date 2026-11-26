@@ -12,6 +12,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Switch;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,10 @@ import java.util.concurrent.Executors;
 public final class MainActivity extends Activity {
     private Switch enableDuration;
     private RadioGroup durationPresets;
+    private Switch enableSpring;
+    private SeekBar springResponse;
+    private SeekBar springDamping;
+    private TextView hookReport;
     private RadioGroup curvePresets;
     private Switch scaleDelays;
     private TextView restartStatus;
@@ -52,7 +57,36 @@ public final class MainActivity extends Activity {
         restartStatus = findViewById(R.id.restart_status);
         preview = findViewById(R.id.motion_preview);
         cardStack = findViewById(R.id.card_stack);
+        TextView identity = findViewById(R.id.build_identity);
+        identity.setText(getString(R.string.build_identity, BuildConfig.VERSION_NAME, BuildConfig.BUILD_ID));
+        enableSpring = findViewById(R.id.enable_spring);
+        springResponse = findViewById(R.id.spring_response);
+        springDamping = findViewById(R.id.spring_damping);
+        hookReport = findViewById(R.id.hook_report);
         bind(SettingsStore.read(this));
+        bindSpring(SettingsStore.readSpring(this));
+        enableSpring.setOnCheckedChangeListener((button, checked) -> saveSpring());
+        SeekBar.OnSeekBarChangeListener springListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                updateSpringLabels();
+                if (fromUser) { saveSpring(); }
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {}
+        };
+        springResponse.setOnSeekBarChangeListener(springListener);
+        springDamping.setOnSeekBarChangeListener(springListener);
+        findViewById(R.id.reset_spring).setOnClickListener(view -> {
+            bindSpring(new SpringSettings(false, 1f, 1f));
+            saveSpring();
+        });
+        findViewById(R.id.refresh_hooks).setOnClickListener(view -> refreshHookReport());
+        RadioGroup tabs = findViewById(R.id.studio_tabs);
+        tabs.setOnCheckedChangeListener((group, checkedId) -> showPage(checkedId, true));
+        int initialTab = savedInstanceState == null ? R.id.tab_spring
+                : savedInstanceState.getInt("studio_tab", R.id.tab_spring);
+        tabs.check(initialTab);
+        showPage(initialTab, false);
         enableDuration.setOnCheckedChangeListener((button, checked) -> save());
         durationPresets.setOnCheckedChangeListener((group, checkedId) -> save());
         curvePresets.setOnCheckedChangeListener((group, checkedId) -> save());
@@ -66,7 +100,8 @@ public final class MainActivity extends Activity {
         details.setText(DeviceDiagnostics.describe(this));
         findViewById(R.id.copy_diagnostics).setOnClickListener(view -> {
             ClipboardManager clipboard = getSystemService(ClipboardManager.class);
-            clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name), details.getText()));
+            clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name),
+                    DeviceDiagnostics.describe(this) + "\n\n" + HookReports.describe(this)));
         });
         findViewById(R.id.restart_launcher).setOnClickListener(view -> new AlertDialog.Builder(this)
                 .setTitle(R.string.restart_launcher)
@@ -77,6 +112,75 @@ public final class MainActivity extends Activity {
         if (savedInstanceState == null) {
             cardStack.post(entrance);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshHookReport();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putInt("studio_tab", ((RadioGroup) findViewById(R.id.studio_tabs)).getCheckedRadioButtonId());
+        super.onSaveInstanceState(state);
+    }
+
+    private void showPage(int tab, boolean animate) {
+        preview.stop();
+        int selected = tab == R.id.tab_motion ? R.id.page_motion
+                : tab == R.id.tab_device ? R.id.page_setup : R.id.page_spring;
+        for (int id : new int[]{R.id.page_spring, R.id.page_motion, R.id.page_setup, R.id.page_features}) {
+            View page = findViewById(id);
+            page.animate().cancel();
+            boolean visible = id == selected || (tab == R.id.tab_device && id == R.id.page_features);
+            page.setVisibility(visible ? View.VISIBLE : View.GONE);
+            page.setAlpha(1f);
+            page.setTranslationY(0f);
+            if (visible && animate && ValueAnimator.areAnimatorsEnabled()) {
+                page.setAlpha(0f);
+                page.setTranslationY(10 * getResources().getDisplayMetrics().density);
+                page.animate().alpha(1f).translationY(0f).setDuration(220).setStartDelay(0)
+                        .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f)).start();
+            }
+        }
+        refreshHookReport();
+    }
+
+    private void bindSpring(SpringSettings settings) {
+        binding = true;
+        enableSpring.setChecked(settings.enabled);
+        springResponse.setProgress(Math.round((settings.responseMultiplier - 0.5f) * 20));
+        springDamping.setProgress(Math.round((settings.damping - 0.5f) * 20));
+        updateSpringLabels();
+        binding = false;
+    }
+
+    private float responseValue() {
+        return Math.round((0.5f + springResponse.getProgress() * 0.05f) * 100) / 100f;
+    }
+
+    private float dampingValue() {
+        return Math.round((0.5f + springDamping.getProgress() * 0.05f) * 100) / 100f;
+    }
+
+    private void updateSpringLabels() {
+        ((TextView) findViewById(R.id.spring_response_label)).setText(
+                getString(R.string.spring_response_value, Float.toString(responseValue())));
+        ((TextView) findViewById(R.id.spring_damping_label)).setText(
+                getString(R.string.spring_damping_value, Float.toString(dampingValue())));
+    }
+
+    private void saveSpring() {
+        if (!binding) {
+            SettingsStore.writeSpring(this, new SpringSettings(enableSpring.isChecked(),
+                    responseValue(), dampingValue()));
+            refreshHookReport();
+        }
+    }
+
+    private void refreshHookReport() {
+        if (hookReport != null) { hookReport.setText(HookReports.describe(this)); }
     }
 
     private void bind(AnimationSettings settings) {
@@ -154,6 +258,7 @@ public final class MainActivity extends Activity {
                     default: message = R.string.restart_failed;
                 }
                 restartStatus.setText(message);
+                refreshHookReport();
             });
         });
     }

@@ -22,8 +22,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Exported for launcher reads; SettingsProvider verifies the Binder caller UID.
-             No remote writes or file access are exposed. -->
+        <!-- Exported for settings reads and launcher-only historical hook reports.
+             Binder UID checks protect both; no remote configuration writes or file access. -->
         <provider
             android:name=".SettingsProvider"
             android:authorities="io.github.hyperdream.module.settings"

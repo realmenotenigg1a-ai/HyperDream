@@ -57,6 +57,16 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.5: Java spring adapter and identifiable builds
+
+The **Spring** tab now has independent damping and response controls connected to a guarded Java `SpringParamsProvider` hook for app open-from-home / close-to-home transitions. This is different from the generic Animator tab's speed/easing controls.
+
+**This is not verified HyperOS 4 support.** The adapter requires an exact Java launcher API; native-only launchers cannot use it. HyperSpring's own documentation warns about this distinction. See [spring compatibility and research references](docs/SPRING-COMPATIBILITY.md) before enabling it.
+
+The launcher reports **disabled / unsupported / registered / parameters replaced / failed**. Reports include the loaded module build and are explicitly historical, not a live “active” badge. “Registered” is not shown as “working.” A mismatch with current settings/build is labeled stale.
+
+The polished interface is split into **Spring / Animator / Device** pages, with an always-visible version/build identity and shared restart action. CI packages a uniquely named APK with SHA-256 checksums, package metadata, build information, and an `apksigner` verification report so builds can be distinguished.
+
 ## Current implementation
 
 The experimental controls hook **Android `ValueAnimator` duration, interpolator, and optional start-delay setters inside the Xiaomi launcher's main process**. It does not change global animation scales or other apps' processes.
@@ -69,7 +79,7 @@ The experimental controls hook **Android `ValueAnimator` duration, interpolator,
 - **Restart to apply** — settings are read once at launcher startup. Use the root-confirmed launcher restart shortcut or reboot, including after disabling/resetting.
 - **Launcher restart** — a fixed, user-confirmed root command force-stops and reopens only `com.miui.home`. Owner profile and Xiaomi launcher as default Home are required. No data is cleared; no automatic restart occurs.
 - **Build details** — displays device/Android incremental build and launcher version, with user-initiated copying. It does not certify HyperOS support.
-- **Read-only settings bridge** — app-private preferences are exposed only to the module's own UID and the Xiaomi launcher's UID; remote writes are not supported.
+- **Read-only settings bridge** — app-private configuration is exposed only to the module's own UID and the Xiaomi launcher's UID. Settings cannot be remotely written. Only the launcher UID may submit limited historical hook reports.
 - **Restricted scope** — only `com.miui.home`, with an additional main-process check in code.
 - **Failure fallback** — if settings cannot be read, the animation hook is not installed.
 
@@ -81,13 +91,13 @@ A replayable local motion illustration shows the selected duration, easing, and 
 
 The in-app **Beyond motion** section lists planned home-screen, folder, recents, gesture, advanced-animation, and layout/sharing work. Those are not working controls. See the [feature scope and implementation gates](docs/FEATURES.md); this is not a claim that every Home Up feature has been implemented or is possible on HyperOS.
 
-### Limitations
+### Generic Animator limitations
 
 This is **not yet a Home Up equivalent**. It has not been verified on a HyperOS 4 device. It only affects explicit `ValueAnimator.setDuration`, `setInterpolator`, and optional `setStartDelay` calls after initialization; it does not override values that never pass through those setters. ObjectAnimator calls delegating to that API can be affected too.
 
-The control may change multiple launcher effects, not just app open/close animations. Private spring engines, render-thread animations, system-managed remote transitions, and animations in other processes may not be affected at all. Custom curve editing, spring parameters, launcher icon sizing/grids, per-app controls, recents styles, and a live launcher preview are not implemented.
+The control may change multiple launcher effects, not just app open/close animations. Private spring engines, render-thread animations, system-managed remote transitions, and animations in other processes may not be affected at all. Custom curve editing, native spring effects, launcher icon sizing/grids, per-app controls, recents styles, and a live launcher preview are not implemented.
 
-The app's Android 12+ minimum SDK is a development baseline, **not** a claim of HyperOS compatibility. This project uses the classic Xposed API rather than the modern libxposed API. The settings screen reports saved configuration, not verified module activation or effective animation behavior.
+The app's Android 12+ minimum SDK is a development baseline, **not** a claim of HyperOS compatibility. This project uses the classic Xposed API rather than the modern libxposed API. The settings screen distinguishes saved configuration from historical spring-hook reports. Neither is a live certification of module activation or visible animation quality.
 
 ## Build
 
@@ -100,7 +110,7 @@ Requirements: **JDK 17 or 21**, Android SDK Platform **35**, Android SDK Build-T
 
 On Windows, use `gradlew.bat`. The Gradle 8.9 wrapper is included. CI uses JDK 21 for current Android SDK tools. The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
-GitHub Actions runs the same checks and uploads a `HyperDream-debug` artifact after a successful build. An artifact is a development build, not a verified compatible release.
+GitHub Actions runs the same checks and uploads a `HyperDream-debug-<commit>` artifact after a successful build. The archive contains `HyperDream-<version>-<build>-debug.apk`, `SHA256SUMS.txt`, `SIGNATURE.txt`, `PACKAGE.txt`, and `BUILD-INFO.txt`. It is a development build, not a verified compatible release. The app header shows the same version/build ID. Never identify an APK just by its icon or filename. CI debug certificates can differ between runs: if Android refuses an update because the signing key differs, disable the old module, uninstall the old test app (losing its local settings), install the new one, re-enable scope, and restart/reboot. These are not production-signed updates.
 
 See [Development notes](docs/DEVELOPMENT.md) for the project layout, verification steps, and boundaries for future hooks.
 
@@ -120,7 +130,7 @@ There is **no published release yet**, and this implementation has not been veri
 
 6. Open HyperDream, choose a duration preset such as **0.75×**, and enable experimental motion controls.
 7. Use **Restart Xiaomi launcher** and confirm/grant root, or reboot. Look for `[HyperDream] Launcher ValueAnimator hooks registered: duration=0.75` in LSPosed logs, then test launcher behavior. That log only confirms hook registration, not that any particular transition uses it.
-8. To revert, tap **Restore defaults** and restart the launcher or reboot. Confirm the next startup logs `controls off or original`.
+8. To revert generic changes, tap **Restore animator defaults**. To revert spring changes, use **Disable and reset springs**. Restart the launcher or reboot after either action.
 
 Opening the HyperDream app does not verify module activation. The diagnostic message verifies entry-point loading only; it does not establish animation support. Devices with a different launcher package are not targeted by this implementation.
 

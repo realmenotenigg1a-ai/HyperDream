@@ -16,3 +16,6 @@ keystore.properties
 .venv/
 __pycache__/
 .DS_Store
+
+# Temporary research and tooling
+.cache/

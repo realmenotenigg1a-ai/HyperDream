@@ -39,6 +39,8 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug 2>&1 | tee android-build.log
+      - name: Verify signing and package uniquely identified APK
+        run: bash .github/scripts/package_debug.sh
       - name: Surface test and lint failures
         if: failure()
         run: python3 .github/scripts/report_failures.py
@@ -54,6 +56,6 @@ jobs:
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
-          name: HyperDream-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: HyperDream-debug-${{ github.sha }}
+          path: build/distribution/
           if-no-files-found: error

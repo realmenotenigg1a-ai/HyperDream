@@ -8,7 +8,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
 
-/** Read-only settings bridge. Never exposes app-private files or accepts remote writes. */
+/** Read-only settings bridge plus UID-authenticated launcher diagnostic reports. */
 public final class SettingsProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
@@ -17,6 +17,11 @@ public final class SettingsProvider extends ContentProvider {
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
+        if (HookReports.METHOD_REPORT.equals(method)) {
+            enforceLauncherReporter();
+            HookReports.record(providerContext(), extras);
+            return Bundle.EMPTY;
+        }
         enforceReader();
         if (!AnimationSettings.METHOD_READ.equals(method)) {
             throw new UnsupportedOperationException("Unknown settings operation");
@@ -27,6 +32,10 @@ public final class SettingsProvider extends ContentProvider {
         result.putFloat(AnimationSettings.KEY_DURATION_SCALE, settings.durationScale);
         result.putString(AnimationSettings.KEY_CURVE, settings.curve);
         result.putBoolean(AnimationSettings.KEY_SCALE_DELAYS, settings.scaleDelays);
+        SpringSettings spring = SettingsStore.readSpring(providerContext());
+        result.putBoolean(SpringSettings.KEY_ENABLED, spring.enabled);
+        result.putFloat(SpringSettings.KEY_RESPONSE, spring.responseMultiplier);
+        result.putFloat(SpringSettings.KEY_DAMPING, spring.damping);
         return result;
     }
 
@@ -36,6 +45,15 @@ public final class SettingsProvider extends ContentProvider {
             throw new IllegalStateException("Provider not initialized");
         }
         return context;
+    }
+
+    private void enforceLauncherReporter() {
+        String[] packages = providerContext().getPackageManager()
+                .getPackagesForUid(Binder.getCallingUid());
+        if (SettingsReaderPolicy.isLauncher(packages)) {
+            return;
+        }
+        throw new SecurityException("Only the launcher UID may report hook status");
     }
 
     private void enforceReader() {

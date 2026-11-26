@@ -30,6 +30,23 @@ final class SettingsStore {
                 .apply();
     }
 
+    static SpringSettings readSpring(Context context) {
+        SharedPreferences prefs = preferences(context);
+        try {
+            return new SpringSettings(prefs.getBoolean(SpringSettings.KEY_ENABLED, false),
+                    prefs.getFloat(SpringSettings.KEY_RESPONSE, 1f),
+                    prefs.getFloat(SpringSettings.KEY_DAMPING, 1f));
+        } catch (ClassCastException malformedPreferences) {
+            return new SpringSettings(false, 1f, 1f);
+        }
+    }
+
+    static void writeSpring(Context context, SpringSettings settings) {
+        preferences(context).edit().putBoolean(SpringSettings.KEY_ENABLED, settings.enabled)
+                .putFloat(SpringSettings.KEY_RESPONSE, settings.responseMultiplier)
+                .putFloat(SpringSettings.KEY_DAMPING, settings.damping).apply();
+    }
+
     /** Call off the UI thread before explicitly restarting the settings reader. */
     static boolean flush(Context context) {
         // A synchronous commit waits for outstanding apply() writes as documented by Android.

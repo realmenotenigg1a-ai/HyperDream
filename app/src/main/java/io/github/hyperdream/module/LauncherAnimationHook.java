@@ -38,13 +38,18 @@ final class LauncherAnimationHook {
                                 XposedBridge.log("[HyperDream] Settings unavailable; no animation hooks installed.");
                                 return;
                             }
+                            // Install the spring adapter independently of generic animator settings.
+                            LauncherSpringHook.install(context, new SpringSettings(
+                                    result.getBoolean(SpringSettings.KEY_ENABLED, false),
+                                    result.getFloat(SpringSettings.KEY_RESPONSE, 1f),
+                                    result.getFloat(SpringSettings.KEY_DAMPING, 1f)));
                             AnimationSettings settings = new AnimationSettings(
                                     result.getBoolean(AnimationSettings.KEY_ENABLED, false),
                                     result.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f),
                                     result.getString(AnimationSettings.KEY_CURVE),
                                     result.getBoolean(AnimationSettings.KEY_SCALE_DELAYS, false));
                             if (!settings.hasOverrides()) {
-                                XposedBridge.log("[HyperDream] Launcher loaded; controls off or original. No animation hooks installed.");
+                                XposedBridge.log("[HyperDream] Launcher loaded; generic controls off or original. No generic animator hooks installed.");
                                 return;
                             }
                             installAnimationHooks(settings);

@@ -17,7 +17,8 @@ final class DeviceDiagnostics {
         } catch (PackageManager.NameNotFoundException unavailable) {
             launcher = context.getString(R.string.launcher_not_installed);
         }
-        return context.getString(R.string.device_report, Build.MANUFACTURER, Build.MODEL,
+        return context.getString(R.string.build_identity, BuildConfig.VERSION_NAME, BuildConfig.BUILD_ID)
+                + "\n" + context.getString(R.string.device_report, Build.MANUFACTURER, Build.MODEL,
                 Build.VERSION.RELEASE, Integer.toString(Build.VERSION.SDK_INT),
                 Build.VERSION.INCREMENTAL, launcher);
     }

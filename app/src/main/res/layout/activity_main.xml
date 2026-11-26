@@ -45,6 +45,7 @@
                         android:text="@string/app_name"
                         android:textSize="28sp" />
                     <TextView
+                        android:id="@+id/build_identity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -81,11 +82,31 @@
                     android:text="@string/config_off"
                     android:textColor="@color/text_primary" />
                 <TextView style="@style/GlassBody" android:text="@string/activation_notice" />
+    <Button android:id="@+id/restart_launcher" style="@style/GlassButton" android:text="@string/restart_launcher" />
+    <TextView
+        android:id="@+id/restart_status"
+        style="@style/GlassBody"
+        android:accessibilityLiveRegion="polite"
+        android:text="@string/restart_explanation" />
+
             </LinearLayout>
 
-            <include layout="@layout/card_motion" />
-            <include layout="@layout/card_features" />
-            <include layout="@layout/card_setup" />
+            <RadioGroup
+                android:id="@+id/studio_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/glass_panel"
+                android:padding="4dp"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/tab_spring" style="@style/StudioTab" android:text="@string/tab_spring" />
+                <RadioButton android:id="@+id/tab_motion" style="@style/StudioTab" android:text="@string/tab_motion" />
+                <RadioButton android:id="@+id/tab_device" style="@style/StudioTab" android:text="@string/tab_device" />
+            </RadioGroup>
+            <include android:id="@+id/page_spring" layout="@layout/card_spring" />
+            <include android:id="@+id/page_motion" layout="@layout/card_motion" />
+            <include android:id="@+id/page_setup" layout="@layout/card_setup" />
+            <include android:id="@+id/page_features" layout="@layout/card_features" />
 
             <TextView
                 style="@style/GlassBody"

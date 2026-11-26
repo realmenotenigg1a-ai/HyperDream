@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/GlassCard">
+    <TextView style="@style/GlassTitle" android:text="@string/spring_title" />
+    <TextView style="@style/GlassBody" android:text="@string/spring_explanation" />
+    <Switch
+        android:id="@+id/enable_spring"
+        style="@style/DurationOption"
+        android:layout_marginTop="16dp"
+        android:text="@string/spring_enable" />
+    <TextView
+        android:id="@+id/spring_response_label"
+        style="@style/GlassBody"
+        android:labelFor="@id/spring_response" />
+    <SeekBar
+        android:id="@+id/spring_response"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:max="20"
+        android:contentDescription="@string/spring_response_accessibility" />
+    <TextView
+        android:id="@+id/spring_damping_label"
+        style="@style/GlassBody"
+        android:labelFor="@id/spring_damping" />
+    <SeekBar
+        android:id="@+id/spring_damping"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:max="14"
+        android:contentDescription="@string/spring_damping_accessibility" />
+    <TextView style="@style/GlassBody" android:text="@string/spring_values_notice" android:textSize="13sp" />
+    <Button android:id="@+id/reset_spring" style="@style/GlassButton" android:text="@string/spring_reset" />
+    <TextView style="@style/GlassBody" android:text="@string/spring_compatibility" android:textColor="@color/warning" />
+    <Button android:id="@+id/refresh_hooks" style="@style/GlassButton" android:text="@string/refresh_hooks" />
+    <TextView
+        android:id="@+id/hook_report"
+        style="@style/GlassBody"
+        android:accessibilityLiveRegion="polite"
+        android:text="@string/report_none" />
+</LinearLayout>

@@ -9,6 +9,11 @@ import static org.junit.Assert.assertTrue;
 import android.animation.TimeInterpolator;
 import android.widget.RadioButton;
 import android.widget.Switch;
+import android.widget.SeekBar;
+import android.widget.RadioGroup;
+import android.view.View;
+import android.os.Bundle;
+import android.content.pm.ProviderInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -80,5 +85,65 @@ public final class MotionUiTest {
                 previous = value;
             }
         }
+    }
+
+    @Test
+    public void springSlidersPersistAndResetIndependently() {
+        ((SeekBar) activity.findViewById(R.id.spring_response)).setProgress(5);
+        ((SeekBar) activity.findViewById(R.id.spring_damping)).setProgress(3);
+        ((Switch) activity.findViewById(R.id.enable_spring)).performClick();
+        SpringSettings settings = SettingsStore.readSpring(activity);
+        assertTrue(settings.enabled);
+        assertEquals(0.75f, settings.responseMultiplier, 0.001f);
+        assertEquals(0.65f, settings.damping, 0.001f);
+        assertFalse(SettingsStore.read(activity).enabled);
+        activity.findViewById(R.id.reset_spring).performClick();
+        assertFalse(SettingsStore.readSpring(activity).enabled);
+        assertEquals(1f, SettingsStore.readSpring(activity).damping, 0f);
+    }
+
+    @Test
+    public void tabsExposeRealPagesAndBuildIdentity() {
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_spring).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.page_setup).getVisibility());
+        ((RadioGroup) activity.findViewById(R.id.studio_tabs)).check(R.id.tab_device);
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.page_spring).getVisibility());
+        String identity = ((android.widget.TextView) activity.findViewById(R.id.build_identity)).getText().toString();
+        assertTrue(identity.contains(BuildConfig.VERSION_NAME));
+        assertTrue(identity.contains(BuildConfig.BUILD_ID));
+    }
+
+    @Test
+    public void providerReadsSpringSettingsButRejectsAppForgedLauncherReports() {
+        SettingsProvider provider = new SettingsProvider();
+        ProviderInfo info = new ProviderInfo();
+        info.authority = AnimationSettings.AUTHORITY;
+        provider.attachInfo(activity, info);
+        Bundle snapshot = provider.call(AnimationSettings.METHOD_READ, null, null);
+        assertFalse(snapshot.getBoolean(SpringSettings.KEY_ENABLED));
+        assertEquals(1f, snapshot.getFloat(SpringSettings.KEY_RESPONSE), 0f);
+        try {
+            provider.call(HookReports.METHOD_REPORT, null, new Bundle());
+            org.junit.Assert.fail("The settings app UID must not impersonate the launcher");
+        } catch (SecurityException expected) {
+            // Only the real launcher UID can submit cross-process reports.
+        }
+    }
+
+    @Test
+    public void historicalReportDistinguishesRegistrationFromParameterReplacement() {
+        Bundle report = new Bundle();
+        report.putString("status", "REGISTERED");
+        report.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
+        report.putString("snapshot", new SpringSettings(false, 1, 1).snapshot());
+        HookReports.record(activity, report);
+        assertTrue(HookReports.describe(activity).contains(activity.getString(R.string.report_registered)));
+        assertTrue(HookReports.describe(activity).contains(activity.getString(R.string.report_historical)));
+        report.putString("status", "APPLIED");
+        HookReports.record(activity, report);
+        assertTrue(HookReports.describe(activity).contains(activity.getString(R.string.report_applied)));
+        SettingsStore.writeSpring(activity, new SpringSettings(true, 0.75f, 0.7f));
+        assertTrue(HookReports.describe(activity).contains(activity.getString(R.string.report_stale)));
     }
 }

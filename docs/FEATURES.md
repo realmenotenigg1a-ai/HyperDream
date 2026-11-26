@@ -6,6 +6,10 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 
 | Feature | What it actually does | Verification |
 | --- | --- | --- |
+| Java spring adapter | Guarded open/close spring-provider hook with damping/response controls | Structural fixtures and UI tested; real launcher and HyperOS 4 unverified; see [compatibility](SPRING-COMPATIBILITY.md) |
+| Historical spring reports | Authenticated launcher state, build/settings matching, timestamp | Not a live active badge; APPLIED means parameter interception, not visual verification |
+| Build identity | Version/commit in UI; distinct APK name, checksums, package/signature metadata | CI verifies APK signing; debug keys may differ between runs |
+| Tabbed studio | Spring / Animator / Device with reduced-motion-aware page transitions | Android UI navigation tested |
 | Launcher duration control | Opt-in multipliers on `ValueAnimator.setDuration(long)` in `com.miui.home` main process | JVM math/policy tests; actual HyperOS effects need device testing |
 | Easing presets | Original, smooth, emphasized/liquid-glide, and linear via `setInterpolator` | Curve-only configuration at 1× supported; device effects unverified |
 | Optional delay scaling | Applies duration multiplier to explicit `setStartDelay` calls | Off by default |
@@ -27,7 +31,7 @@ The preview illustrates **the selected duration, easing preset, and optional del
 | Folders | Grid, popup size, visual treatment, open/close motion | Identify folder implementation in supported launcher builds |
 | Recents / task switcher | Layout styles, card size/labels, switching behavior | Determine launcher vs system ownership; do not broaden scope blindly |
 | Gestures | Home gesture behavior, swipe response, navigation motion | Inspect input ownership, cancellation, and accessibility behavior |
-| Advanced animation | Private springs, custom curve editing, app return, per-app profiles | Identify and version-gate private animation/remote-transition APIs |
+| Advanced animation | Native spring engines, custom curve editing, genie/cup effects, per-app profiles | Identify and version-gate private animation/remote-transition APIs |
 | DIY-style arrangement | More flexible element placement | Investigate layout persistence, widgets, touch targets, and safe reset |
 | Backup / restore | Layout snapshots and recovery | Validate schema compatibility and transactional restore before any writes |
 | Share panel | Sharing layout/options | Research only; may be outside launcher scope or infeasible |

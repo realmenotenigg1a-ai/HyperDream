@@ -8,6 +8,10 @@ final class SettingsReaderPolicy {
         if (ownUid == callingUid) {
             return true;
         }
+        return isLauncher(callerPackages);
+    }
+
+    static boolean isLauncher(String[] callerPackages) {
         if (callerPackages != null) {
             for (String name : callerPackages) {
                 if (TargetPackages.MIUI_HOME.equals(name)) {

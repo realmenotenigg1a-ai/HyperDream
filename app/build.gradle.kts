@@ -11,8 +11,10 @@ android {
         applicationId = "io.github.hyperdream.module"
         minSdk = 31
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4.0-dev"
+        versionCode = 5
+        versionName = "0.5.0-dev"
+        val revision = providers.environmentVariable("GITHUB_SHA").map { it.take(8) }.getOrElse("local")
+        buildConfigField("String", "BUILD_ID", "\"$revision\"")
     }
 
     buildTypes {
@@ -20,6 +22,10 @@ android {
             // Keep the entry-point class name intact for assets/xposed_init.
             isMinifyEnabled = false
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     testOptions {
