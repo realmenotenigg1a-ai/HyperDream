@@ -19,7 +19,20 @@ jobs:
           java-version: '21'
       # ubuntu-latest already provides Android SDK command-line tools.
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDK_MANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$SDK_MANAGER" ]]; then
+            echo "::error title=Android SDK unavailable::Expected sdkmanager at $SDK_MANAGER on the ubuntu-latest runner."
+            exit 1
+          fi
+          if ! "$SDK_MANAGER" "platforms;android-35" "build-tools;35.0.0" > sdk-setup.log 2>&1; then
+            cat sdk-setup.log
+            MESSAGE=$(tail -n 15 sdk-setup.log | tr '\n' ' ')
+            echo "::error title=Android SDK setup failed::${MESSAGE//'%'/'%25'}"
+            exit 1
+          fi
       - uses: gradle/actions/setup-gradle@v4
       - name: Test, lint, and assemble debug APK
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
