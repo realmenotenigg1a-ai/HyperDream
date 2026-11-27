@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -22,7 +24,17 @@ final class HookReports {
 
     enum Status { DISABLED, UNSUPPORTED, REGISTERED, OBSERVED, APPLIED, FAILED }
 
+    private static final AtomicInteger DELIVERY_FAILURES = new AtomicInteger();
+
     private HookReports() {}
+
+    static void enqueue(Runnable task) { SENDER.execute(task); }
+
+    static void logDeliveryFailure(String kind, String failureClass) {
+        if (DELIVERY_FAILURES.getAndIncrement() < 3) {
+            Log.w("HyperDream", "Report delivery failed: " + kind + "/" + failureClass);
+        }
+    }
 
     static void send(Context context, Status status, SpringSettings settings) {
         send(context, status, settings, "");
@@ -37,10 +49,11 @@ final class HookReports {
                 payload.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
                 payload.putString("snapshot", settings.snapshot());
                 payload.putString("diagnostics", boundedDiagnostics);
-                context.getContentResolver().call(Uri.parse("content://" + AnimationSettings.AUTHORITY),
+                Bundle acknowledgement = context.getContentResolver().call(Uri.parse("content://" + AnimationSettings.AUTHORITY),
                         METHOD_REPORT, null, payload);
-            } catch (RuntimeException ignored) {
-                // Diagnostics must never break launcher startup or an animation callback.
+                if (acknowledgement == null) { logDeliveryFailure("spring", "NullAcknowledgement"); }
+            } catch (RuntimeException failure) {
+                logDeliveryFailure("spring", failure.getClass().getSimpleName());
             }
         });
     }
@@ -63,6 +76,10 @@ final class HookReports {
     }
 
     static String describe(Context context) {
+        return StartupReports.describe(context) + "\n\n" + describeSpring(context);
+    }
+
+    private static String describeSpring(Context context) {
         SharedPreferences prefs = preferences(context);
         long timestamp = prefs.getLong("time", 0);
         if (timestamp == 0) {

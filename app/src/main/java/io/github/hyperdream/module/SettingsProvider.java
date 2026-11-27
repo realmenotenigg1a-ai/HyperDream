@@ -17,6 +17,11 @@ public final class SettingsProvider extends ContentProvider {
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
+        if (StartupReports.METHOD_REPORT.equals(method)) {
+            enforceLauncherReporter();
+            StartupReports.record(providerContext(), extras);
+            return Bundle.EMPTY;
+        }
         if (HookReports.METHOD_REPORT.equals(method)) {
             enforceLauncherReporter();
             HookReports.record(providerContext(), extras);

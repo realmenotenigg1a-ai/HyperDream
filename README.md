@@ -57,6 +57,18 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.7.1: startup recovery attempt and supplied logo
+
+The launcher icon, in-app header and README now use the newly supplied logo unchanged. The black background and floating glass navigation remain.
+
+This is the safest **Java startup recovery attempt**, not a native-HyperOS animation fix:
+
+- Independent `Application.attach`, base `Application.onCreate`, and already-created-Application entry paths share a single-install guard. A base `onCreate` hook is a fallback, not a guarantee that launcher subclasses call it.
+- Temporarily unavailable settings are retried at bounded intervals: at most six reads over 56 seconds of scheduled delay. Authorization denial stops immediately; installation failures are not retried, to avoid duplicate or partially applied hooks.
+- Authenticated Java startup checkpoints now appear alongside the separate spring report. An `INITIALIZED` checkpoint means the install routine returned, **not** that an animation hook ran. Bounded Android-log warnings expose failed report delivery.
+
+The user’s screenshots show LSPosed **2.2.1 (7912), API 102**, enabled launcher-only scope with a **HyperOS Runtime** badge, Android 17, and launcher `801030308`. No Java startup log/report was found. This makes a different/native loading path a strong concern, but does not establish the sole cause. **If the framework never calls the Java entry point, these recovery paths cannot run. No native loader, AOT animation resolver, hardcoded offset or System Framework hook has been added.** No on-device success is claimed.
+
 ## v0.7: floating glass navigation
 
 **Home / Animator / Device** now live in a floating bottom capsule over the solid black screen. Home opens the spring controls. Drag the circular glass lens; its entire circumference is constrained inside the capsule, including the rounded ends. Release to select the nearest destination, or tap a destination directly.

@@ -270,4 +270,53 @@ public final class MotionUiTest {
         ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
                 .setBackdropSource(activity.findViewById(R.id.screen_root));
     }
+
+    @Test
+    public void startupCheckpointIsCopyableButNotAnAppliedHookClaim() {
+        Bundle report = new Bundle();
+        report.putString("stage", "SETTINGS_UNAVAILABLE");
+        report.putInt("attempt", 6);
+        report.putString("failure", "NullSettings");
+        report.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
+        StartupReports.record(activity, report);
+        activity.findViewById(R.id.copy_hook_diagnostics).performClick();
+        android.content.ClipboardManager clipboard = activity.getSystemService(android.content.ClipboardManager.class);
+        String copied = clipboard.getPrimaryClip().getItemAt(0).coerceToText(activity).toString();
+        assertTrue(copied.contains("SETTINGS_UNAVAILABLE"));
+        assertTrue(copied.contains("NullSettings"));
+        assertTrue(copied.contains(activity.getString(R.string.report_none)));
+        assertFalse(copied.contains(activity.getString(R.string.report_applied)));
+        report.putString("build", "older-build");
+        StartupReports.record(activity, report);
+        assertTrue(StartupReports.describe(activity).contains(activity.getString(R.string.startup_stale)));
+    }
+
+    @Test
+    public void providerRejectsAppForgedStartupCheckpoints() {
+        SettingsProvider provider = new SettingsProvider();
+        ProviderInfo info = new ProviderInfo();
+        info.authority = AnimationSettings.AUTHORITY;
+        provider.attachInfo(activity, info);
+        try {
+            provider.call(StartupReports.METHOD_REPORT, null, new Bundle());
+            org.junit.Assert.fail("App UID must not impersonate launcher startup");
+        } catch (SecurityException expected) { /* Authenticated launcher only. */ }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void startupReportsRejectUnboundedAttempts() {
+        Bundle report = new Bundle();
+        report.putString("stage", "READING_SETTINGS");
+        report.putInt("attempt", 99);
+        StartupReports.record(activity, report);
+    }
+
+    @Test
+    public void suppliedLogoIsUsedForAppAndHeader() {
+        android.graphics.Bitmap logo = android.graphics.BitmapFactory.decodeResource(
+                activity.getResources(), R.drawable.ic_launcher);
+        assertEquals(1080, logo.getWidth());
+        assertEquals(1080, logo.getHeight());
+        assertEquals(R.drawable.ic_launcher, activity.getApplicationInfo().icon);
+    }
 }

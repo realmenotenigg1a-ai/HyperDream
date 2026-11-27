@@ -16,7 +16,7 @@ A version string is not an ELF fingerprint or proof this user's APK has identica
 
 ## Diagnostic build
 
-1. Verify the header says `v0.6.0-diagnostic` and the expected build ID from the artifact filename.
+1. Verify the header says `v0.7.1-recovery` and the expected build ID from the artifact filename.
 2. Enable HyperDream in LSPosed with only `com.miui.home` scoped. Enable the separate Java spring override in HyperDream.
 3. Restart the launcher or reboot, open apps from Home and close back to Home several times, and leave the launcher process alive for at least 60 seconds.
 4. Open HyperDream and refresh the Spring report. Read Device → Launcher runtime evidence after the local inspection completes.
@@ -42,3 +42,22 @@ Sampling is bounded and the report is historical. Refresh does not force the lau
 ## What is not fixed
 
 The diagnostic build adds no arbitrary native offsets, in-memory code patches, native loaders, automatic deoptimization, or expanded System UI/framework scope. A real native port requires the correct framework/runtime ABI, exact binary analysis or semantic resolution, lifecycle/ownership checks, isolated tests, recovery controls, and physical-device validation. None of those can be replaced by a successful Java registration log.
+
+
+## New evidence and safest recovery attempt (v0.7.1)
+
+The user supplied an in-app report from v0.7.0 / `6a9be62c`: Xiaomi 24129PN74C, Android 17/API 37, OS4.0.4.0.XOCCNXM, launcher 801030308. ZIP metadata reports `lib/arm64-v8a/libapp.so`, 31,124,752 bytes, CRC32 `225e1966`; no complete engine/app library pair in accessible APKs. The engine can live outside those APKs; missing pair evidence is not proof of Java-only execution. The user confirms reboot and enabled launcher-only scope. Screenshots show LSPosed 2.2.1 (7912), API 102, and the launcher marked **HyperOS Runtime**. Other modules log inside System UI/system; those do not establish HyperDream delivery into the launcher. No HyperDream entry logs or spring reports were found.
+
+The previous Java startup path had a single `Application.attach` hook and one settings read. v0.7.1 adds independent base-onCreate and late-current-Application fallbacks, one guarded main-thread settings-read/recovery chain, bounded retries for temporary read failures, and separately authenticated startup checkpoints. Security denial is terminal. Once installation starts it is never retried; an installation failure may leave the independent spring adapter installed and is reported as `INSTALL_FAILED`, not success. Generic hook rollback retains its existing behavior.
+
+New copyable checkpoint meanings:
+
+- `CONTEXT_READY` / `READING_SETTINGS`: Java startup reached a Context; no spring-install or animation-success claim.
+- `WAITING_FOR_SETTINGS`: temporary failure; another bounded read is scheduled.
+- `SETTINGS_UNAVAILABLE`: six reads exhausted; no installation attempted.
+- `SETTINGS_DENIED`: provider authorization denied; no retry or installation.
+- `INSTALLING` / `INITIALIZED`: settings returned; installation routine began/returned. Read the independent spring outcome for DISABLED/UNSUPPORTED/REGISTERED/OBSERVED/APPLIED.
+- `INSTALL_FAILED`: installation threw; no reinstallation loop.
+- No startup checkpoint: still inconclusive between no Java entry, callback issues, and report transport failure. Recovery cannot manufacture Java entry into a native-only process.
+
+This build attempts fixes for missed callbacks and transient IPC availability only. It is not a native integration implementation and is not known to fix this physical device. Do not recommend broader scope, framework replacement or disabling protection based only on these screenshots. No further binary-upload request is required for this diagnostic attempt.

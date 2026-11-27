@@ -6,6 +6,7 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 
 | Feature | What it actually does | Verification |
 | --- | --- | --- |
+| Java startup recovery | Guarded attach/onCreate/late-entry fallbacks and up to six settings reads; independent authenticated startup checkpoint | Policy tests; no native runtime delivery and no physical-device success claimed |
 | Java spring adapter | Guarded open/close spring-provider hook with damping/response controls | Structural fixtures and UI tested; real launcher and HyperOS 4 unverified; see [compatibility](SPRING-COMPATIBILITY.md) |
 | Historical spring reports | Authenticated launcher state, build/settings matching, timestamp | Not a live active badge; APPLIED means parameter interception, not visual verification |
 | Build identity | Version/commit in UI; distinct APK name, checksums, package/signature metadata | CI verifies APK signing; debug keys may differ between runs |

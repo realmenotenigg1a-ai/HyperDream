@@ -72,7 +72,7 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="restart_save_failed">Settings could not be flushed to storage. No restart was attempted.</string>
     <string name="launcher_not_installed">Xiaomi launcher is not installed or is unavailable in this profile.</string>
     <string name="device_heading">Device and compatibility</string>
-    <string name="device_report">Device: %1$s %2$s\nAndroid: %3$s (API %4$s)\nOS incremental build: %5$s\nXiaomi launcher: %6$s\nHyperOS compatibility: NOT VERIFIED. Build information is not certification. Share your full HyperOS version and launcher APK for investigation.</string>
+    <string name="device_report">Device: %1$s %2$s\nAndroid: %3$s (API %4$s)\nOS incremental build: %5$s\nXiaomi launcher: %6$s\nHyperOS compatibility: NOT VERIFIED. Build information is not certification. Share your full HyperOS version and copied startup report for investigation; no APK upload is required for diagnostics.</string>
     <string name="copy_diagnostics">Copy build details</string>
     <string name="build_identity">v%1$s · build %2$s</string>
     <string name="nav_home">Home</string>
@@ -90,6 +90,9 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="spring_reset">Disable and reset springs</string>
     <string name="spring_compatibility">Requires the exact Java SpringParamsProvider API. Stock HyperOS 4 may use a native launcher without this API. In that case LSPosed cannot apply this adapter; no effect is promised. Do not install an unknown replacement launcher just to try it.</string>
     <string name="refresh_hooks">Refresh launcher report</string>
+    <string name="startup_none">No authenticated Java startup report received. This cannot distinguish missing Java entry, failed IPC, or a HyperOS Runtime/native-only loading path. Selecting the launcher scope alone does not add native support.</string>
+    <string name="startup_details">Java startup checkpoint: %1$s\nSettings-read attempt: %2$d / 6\nFailure class (if any): %3$s\nLauncher-loaded module: %4$s\nReported: %5$s\n%6$s\nINITIALIZED means the settings/install routine finished, not that an animation was changed. Check the separate spring outcome below.</string>
+    <string name="startup_stale">Different module build. This startup checkpoint is stale.</string>
     <string name="report_none">No launcher spring report received. Enable the module for Xiaomi Launcher and restart/reboot, then refresh. Missing reports do not prove the launcher API is supported. Check Device → Launcher runtime evidence for native-library indicators.</string>
     <string name="report_disabled">Spring override was disabled at startup</string>
     <string name="report_unsupported">Java spring API missing or signature unsupported — spring overrides not installed</string>

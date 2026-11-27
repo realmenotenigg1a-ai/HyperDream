@@ -3,6 +3,10 @@ package io.github.hyperdream.module;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
+
+import android.app.AndroidAppHelper;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,43 +26,64 @@ final class LauncherAnimationHook {
     private LauncherAnimationHook() {}
 
     static void install() {
-        XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class,
-                new XC_MethodHook() {
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) {
-                        if (param.hasThrowable() || !INITIALIZED.compareAndSet(false, true)) {
-                            return;
+        // Independent fallbacks: failure to hook attach must not prevent onCreate/late entry.
+        try {
+            XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class,
+                    new XC_MethodHook() {
+                        @Override protected void afterHookedMethod(MethodHookParam param) {
+                            if (!param.hasThrowable()) { start((Context) param.args[0]); }
                         }
-                        Context context = (Context) param.args[0];
-                        try {
-                            Bundle result = context.getContentResolver().call(
-                                    Uri.parse("content://" + AnimationSettings.AUTHORITY),
-                                    AnimationSettings.METHOD_READ, null, null);
-                            if (result == null) {
-                                XposedBridge.log("[HyperDream] Settings unavailable; no animation hooks installed.");
-                                return;
-                            }
-                            // Install the spring adapter independently of generic animator settings.
-                            LauncherSpringHook.install(context, new SpringSettings(
-                                    result.getBoolean(SpringSettings.KEY_ENABLED, false),
-                                    result.getFloat(SpringSettings.KEY_RESPONSE, 1f),
-                                    result.getFloat(SpringSettings.KEY_DAMPING, 1f)));
-                            AnimationSettings settings = new AnimationSettings(
-                                    result.getBoolean(AnimationSettings.KEY_ENABLED, false),
-                                    result.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f),
-                                    result.getString(AnimationSettings.KEY_CURVE),
-                                    result.getBoolean(AnimationSettings.KEY_SCALE_DELAYS, false));
-                            if (!settings.hasOverrides()) {
-                                XposedBridge.log("[HyperDream] Launcher loaded; generic controls off or original. No generic animator hooks installed.");
-                                return;
-                            }
-                            installAnimationHooks(settings);
-                        } catch (RuntimeException | LinkageError failure) {
-                            XposedBridge.log("[HyperDream] Initialization failed: "
-                                    + failure.getClass().getSimpleName());
-                        }
-                    }
+                    });
+        } catch (RuntimeException | LinkageError unavailable) {
+            XposedBridge.log("[HyperDream] attach callback unavailable: " + unavailable.getClass().getSimpleName());
+        }
+        try {
+            XposedHelpers.findAndHookMethod(Application.class, "onCreate", new XC_MethodHook() {
+                @Override protected void afterHookedMethod(MethodHookParam param) {
+                    if (!param.hasThrowable()) { start((Application) param.thisObject); }
+                }
+            });
+        } catch (RuntimeException | LinkageError unavailable) {
+            XposedBridge.log("[HyperDream] onCreate fallback unavailable: " + unavailable.getClass().getSimpleName());
+        }
+        // Handles module entry after Application.attach has already completed.
+        Application application = AndroidAppHelper.currentApplication();
+        if (application != null) { start(application); }
+    }
+
+    private static void start(Context context) {
+        if (context == null || !INITIALIZED.compareAndSet(false, true)) { return; }
+        Handler main = new Handler(Looper.getMainLooper());
+        StartupRecovery<Bundle> recovery = new StartupRecovery<>(
+                (task, delay) -> main.postDelayed(task, delay),
+                () -> context.getContentResolver().call(
+                        Uri.parse("content://" + AnimationSettings.AUTHORITY),
+                        AnimationSettings.METHOD_READ, null, null),
+                result -> installFromSettings(context, result),
+                (stage, attempt, failure) -> {
+                    XposedBridge.log("[HyperDream] Startup " + stage.name()
+                            + " attempt=" + attempt + " failure=" + failure);
+                    StartupReports.send(context, stage, attempt, failure);
                 });
+        // One serialized main-thread chain. No repeated hook installation or idle polling.
+        main.post(recovery::start);
+    }
+
+    private static void installFromSettings(Context context, Bundle result) {
+        LauncherSpringHook.install(context, new SpringSettings(
+                result.getBoolean(SpringSettings.KEY_ENABLED, false),
+                result.getFloat(SpringSettings.KEY_RESPONSE, 1f),
+                result.getFloat(SpringSettings.KEY_DAMPING, 1f)));
+        AnimationSettings settings = new AnimationSettings(
+                result.getBoolean(AnimationSettings.KEY_ENABLED, false),
+                result.getFloat(AnimationSettings.KEY_DURATION_SCALE, 1f),
+                result.getString(AnimationSettings.KEY_CURVE),
+                result.getBoolean(AnimationSettings.KEY_SCALE_DELAYS, false));
+        if (!settings.hasOverrides()) {
+            XposedBridge.log("[HyperDream] Settings read; generic controls off/original. No generic animator hooks installed.");
+            return;
+        }
+        installAnimationHooks(settings);
     }
 
     private static void installAnimationHooks(AnimationSettings settings) {
