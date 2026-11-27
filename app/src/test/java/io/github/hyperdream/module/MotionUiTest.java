@@ -252,4 +252,22 @@ public final class MotionUiTest {
         assertTrue(navigation.isLensContained());
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_motion).getVisibility());
     }
+
+    @Test
+    public void floatingDestinationSurvivesActivityRecreation() {
+        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
+                .selectTab(LiquidGlassNavigationView.DEVICE, false);
+        controller.recreate();
+        activity = controller.get();
+        assertEquals(LiquidGlassNavigationView.DEVICE,
+                ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation)).getSelectedTab());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.page_motion).getVisibility());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void capturingAnAncestorIsRejectedToPreventRecursiveScreenshots() {
+        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
+                .setBackdropSource(activity.findViewById(R.id.screen_root));
+    }
 }

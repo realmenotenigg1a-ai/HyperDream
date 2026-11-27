@@ -48,11 +48,16 @@ public final class LiquidGlassNavigationView extends View {
     private final String[] drawnLabels = new String[3];
     private final float density;
     private final int touchSlop;
+    private View source;
     private final ViewTreeObserver.OnScrollChangedListener scrollListener = this::requestBackdropRefresh;
+    private final ViewTreeObserver.OnPreDrawListener dirtyListener = () -> {
+        // A lens redraw alone must not start another capture. Only changed source content does.
+        if (source != null && source.isDirty()) { requestBackdropRefresh(); }
+        return true;
+    };
     private final OnLayoutChangeListener layoutListener = (view, l, t, r, b, ol, ot, or, ob) -> requestBackdropRefresh();
     private final Runnable captureFrame = this::captureBackdrop;
     private final NavigationNodes nodes = new NavigationNodes();
-    private View source;
     private boolean observing;
     private boolean capturePosted;
     private boolean paused;
@@ -152,6 +157,7 @@ public final class LiquidGlassNavigationView extends View {
     private void startObserving() {
         if (source == null || observing) { return; }
         source.getViewTreeObserver().addOnScrollChangedListener(scrollListener);
+        source.getViewTreeObserver().addOnPreDrawListener(dirtyListener);
         source.addOnLayoutChangeListener(layoutListener);
         observing = true;
     }
@@ -160,6 +166,7 @@ public final class LiquidGlassNavigationView extends View {
         if (source != null && observing) {
             if (source.getViewTreeObserver().isAlive()) {
                 source.getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
+                source.getViewTreeObserver().removeOnPreDrawListener(dirtyListener);
             }
             source.removeOnLayoutChangeListener(layoutListener);
         }
