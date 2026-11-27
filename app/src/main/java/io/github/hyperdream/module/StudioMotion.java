@@ -51,6 +51,7 @@ final class StudioMotion {
 
     static void acknowledge(View view) {
         view.animate().cancel();
+        view.setTranslationY(0);
         view.setAlpha(1);
         if (ValueAnimator.areAnimatorsEnabled() && view.isShown()) {
             view.setAlpha(0.6f);

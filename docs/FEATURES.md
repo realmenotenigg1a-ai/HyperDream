@@ -19,8 +19,8 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 | Device/build report | Locally display/copy Android build and launcher version | No automatic upload or claim of HyperOS verification |
 | Duration presets | 0.5×, 0.75×, 1×, 1.5× | Settings persisted privately; restart launcher or reboot to apply |
 | Restore defaults | Saves disabled / 1× / original curve / unscaled delays | Launcher restart or reboot required to remove a running process's existing hook |
-| Settings UI | Plain black background, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; live app-local glass only in floating navigation |
-| In-app motion | Staggered entry and a replayable icon-to-card illustration | Local only; never used as proof the launcher hook works |
+| Settings UI | Black background, shorter page introductions, direct studio controls, opt-in compatibility details, rounded supplied logo | UI navigation/disclosure/settings tests; hook implementation unchanged |
+| In-app motion | Staggered entry, page transitions, press/release feedback across native controls, nav icon pulse, save/disclosure fades and replayable preview | Local only; never used as proof the launcher hook works |
 | Reduced-motion behavior | Skips entry motion and shows a still preview when system animator duration scale is zero | Device accessibility verification still needed |
 
 The preview illustrates **the selected duration, easing preset, and optional delay scaling**. Original easing uses demonstration curves; selected presets are also wired to the launcher setter hook but do not simulate private HyperOS springs. It works with the module disabled and outside LSPosed. It is not a live recording or simulation of private launcher internals.

@@ -57,6 +57,18 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.8: clearer glass, friendlier studio
+
+This release is **app UI only**; launcher hook behavior is unchanged.
+
+- Fixed the sharp, repeated text visible inside floating navigation: both renderers now use the same three-pass frosted capture. The shader no longer fakes blur with nine separated sharp samples. Refraction is smaller, bitmap filtering is explicit, and a stronger dark tint protects the navigation labels while retaining live backdrop color.
+- Home opens directly into spring controls; Animator opens into the motion lab. The large shared setup/restart block now belongs to Device, rather than covering the controls on every page.
+- Shorter per-page introductions, rounded logo presentation, saved-on-device feedback, and an expandable compatibility section keep the interface approachable without hiding the experimental status or claiming launcher success.
+- Consistent press/release scale and ripple feedback on buttons, switches, radio options and sliders; checked options stay highlighted. Navigation has a short selected-icon pulse in addition to the bounded moving lens. Page changes, details expansion and save feedback use restrained fades/motion. Native press handling, keyboard interaction and accessibility click semantics are preserved.
+- Per-tab scroll positions and compatibility expansion survive recreation. System animations-off skips custom motion; leaving the Activity clears pressed scales and cancels transient feedback.
+
+Automated checks cover blur edge suppression, shader contrast bounds, disclosure state, feedback coverage and existing settings/navigation behavior. Physical Xiaomi GPU/visual/performance confirmation is still pending; the supplied screenshot is the bug report, not an after-fix verification.
+
 ## v0.7.1: startup recovery attempt and supplied logo
 
 The launcher icon, in-app header and README now use the newly supplied logo unchanged. The black background and floating glass navigation remain.
