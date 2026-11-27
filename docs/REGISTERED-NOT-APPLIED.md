@@ -10,7 +10,7 @@ Do not follow a mirror's generic advice to uninstall a system launcher. No launc
 
 - [KeiHome's incident report at c02cc210](https://github.com/hosizoraru/KeiHome/blob/c02cc21061eadf0e13c194795a324ba190891f6b/docs/launcher-boot-incident-20261125.md) describes launcher `801030308` on a HyperOS 4 device using the native HyperOS Runtime path and a separate native module entry point. It also reports framework-specific startup crashes and later follow-up observations. These are that project's observations, not tests performed by HyperDream. They do not justify prescribing a framework upgrade/downgrade for this user.
 - [HyperGlass adaptation notes at c0c565b5](https://github.com/finall1008/HyperGlass/blob/c0c565b5349fa8ce1b3b3cd5bc82da3cf1ddd233/docs/launcher-adaptation.md) describe a `libapp.so` reference for `801030308` and native/ARM64 adaptation and visual testing. No source from that repository is bundled or copied.
-- [Zygisk Next HyperOS Runtime documentation](https://github.com/LSPosed/ZygiskNext/blob/main/docs/hyos_runtime.md) is relevant background for a future native implementation; HyperDream's current APK does not implement that loading chain.
+- [Zygisk Next HyperOS Runtime documentation](https://github.com/Dr-TSNG/ZygiskNext/blob/main/docs/hyos_runtime.md) is relevant background for a future native implementation; HyperDream's current APK does not implement that loading chain.
 
 A version string is not an ELF fingerprint or proof this user's APK has identical contents. These sources explain why Java-only hooks are an inadequate assumption, not a complete native implementation plan.
 
@@ -61,3 +61,6 @@ New copyable checkpoint meanings:
 - No startup checkpoint: still inconclusive between no Java entry, callback issues, and report transport failure. Recovery cannot manufacture Java entry into a native-only process.
 
 This build attempts fixes for missed callbacks and transient IPC availability only. It is not a native integration implementation and is not known to fix this physical device. Do not recommend broader scope, framework replacement or disabling protection based only on these screenshots. No further binary-upload request is required for this diagnostic attempt.
+
+
+The current upstream [HyperOS Rust Runtime API documentation](https://github.com/Dr-TSNG/ZygiskNext/blob/main/docs/hyos_runtime.md) was retrieved directly during this attempt (the former LSPosed/ZygiskNext repository now redirects users to Dr-TSNG). It explicitly describes a runtime independent of ART, with no JNI/Java objects, and a separate native registration/specialization path. This confirms that Java callback recovery is not a substitute for native support. No native API header, loader or unrelated native code was copied into HyperDream; a logging-only native payload would not fix animation customization either.

@@ -93,7 +93,7 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="startup_none">No authenticated Java startup report received. This cannot distinguish missing Java entry, failed IPC, or a HyperOS Runtime/native-only loading path. Selecting the launcher scope alone does not add native support.</string>
     <string name="startup_details">Java startup checkpoint: %1$s\nSettings-read attempt: %2$d / 6\nFailure class (if any): %3$s\nLauncher-loaded module: %4$s\nReported: %5$s\n%6$s\nINITIALIZED means the settings/install routine finished, not that an animation was changed. Check the separate spring outcome below.</string>
     <string name="startup_stale">Different module build. This startup checkpoint is stale.</string>
-    <string name="report_none">No launcher spring report received. Enable the module for Xiaomi Launcher and restart/reboot, then refresh. Missing reports do not prove the launcher API is supported. Check Device → Launcher runtime evidence for native-library indicators.</string>
+    <string name="report_none">No launcher spring report received. Read the Java startup checkpoint above first. If that is also missing and LSPosed marks the launcher as HyperOS Runtime, Java entry may not run. Native runtime integration is not implemented; selecting scope or repeating reboots cannot supply it. Missing reports alone do not prove the cause.</string>
     <string name="report_disabled">Spring override was disabled at startup</string>
     <string name="report_unsupported">Java spring API missing or signature unsupported — spring overrides not installed</string>
     <string name="report_registered">Spring hook registered — inspect observed call count below; registration alone does not mean the transition uses it</string>
