@@ -369,4 +369,36 @@ public final class MotionUiTest {
         }
         feedback.stop();
     }
+
+    private void layoutStudio() {
+        View root = activity.findViewById(R.id.screen_root);
+        root.requestLayout();
+        root.measure(View.MeasureSpec.makeMeasureSpec(360, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(800, View.MeasureSpec.EXACTLY));
+        root.layout(0, 0, 360, 800);
+        root.getViewTreeObserver().dispatchOnPreDraw();
+    }
+
+    @Test
+    public void eachTabRestoresScrollAfterNewPageMeasurement() {
+        activity.findViewById(R.id.toggle_diagnostics).performClick();
+        layoutStudio();
+        android.widget.ScrollView scroll = activity.findViewById(R.id.studio_scroll);
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        scroll.scrollTo(0, 180);
+        int homeOffset = scroll.getScrollY();
+        assertTrue(homeOffset > 0);
+        navigation.selectTab(LiquidGlassNavigationView.DEVICE, false);
+        layoutStudio();
+        assertEquals(0, scroll.getScrollY());
+        scroll.scrollTo(0, 60);
+        int deviceOffset = scroll.getScrollY();
+        assertTrue(deviceOffset > 0);
+        navigation.selectTab(LiquidGlassNavigationView.HOME, false);
+        layoutStudio();
+        assertEquals(homeOffset, scroll.getScrollY());
+        navigation.selectTab(LiquidGlassNavigationView.DEVICE, false);
+        layoutStudio();
+        assertEquals(deviceOffset, scroll.getScrollY());
+    }
 }

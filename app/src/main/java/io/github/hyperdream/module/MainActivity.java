@@ -38,6 +38,7 @@ public final class MainActivity extends Activity {
     private int activeTab = -1;
     private int[] pageScrolls = new int[3];
     private boolean diagnosticsExpanded;
+    private android.view.ViewTreeObserver.OnPreDrawListener pendingScrollRestore;
     private LinearLayout cardStack;
     private boolean binding;
     private final Runnable entrance = this::animateEntrance;
@@ -188,15 +189,29 @@ public final class MainActivity extends Activity {
                         .withEndAction(navigation::requestBackdropRefresh).start();
             }
         }
-        scroll.post(() -> {
+        cancelScrollRestore();
+        // Restore only after the newly visible page has been measured, not against
+        // the previous page's shorter scroll range. Rapid tab taps replace this listener.
+        pendingScrollRestore = () -> {
+            cancelScrollRestore();
             if (activeTab == tab && !isDestroyed()) {
                 scroll.scrollTo(0, Math.max(0, pageScrolls[tab]));
                 navigation.requestBackdropRefresh();
             }
-        });
+            return true;
+        };
+        scroll.getViewTreeObserver().addOnPreDrawListener(pendingScrollRestore);
         if (animate) { StudioMotion.acknowledge(findViewById(R.id.studio_heading)); }
         navigation.requestBackdropRefresh();
         refreshHookReport();
+    }
+
+    private void cancelScrollRestore() {
+        if (pendingScrollRestore != null) {
+            android.view.ViewTreeObserver observer = findViewById(R.id.studio_scroll).getViewTreeObserver();
+            if (observer.isAlive()) { observer.removeOnPreDrawListener(pendingScrollRestore); }
+            pendingScrollRestore = null;
+        }
     }
 
     private void updateDiagnosticDisclosure(boolean animate) {
@@ -405,6 +420,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onStop() {
+        cancelScrollRestore();
         studioMotion.stop();
         for (int id : new int[]{R.id.spring_saved, R.id.motion_saved, R.id.studio_heading,
                 R.id.diagnostic_details, R.id.hook_report}) {
