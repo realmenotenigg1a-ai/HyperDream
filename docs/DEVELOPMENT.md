@@ -159,3 +159,19 @@ Discrete Slider values preserve the previous spring math and settings schema. Ma
 `SystemUiRestartPolicy` contains one fixed command, with no UI/IPC-supplied fragments. It checks root and foreground user 0, obtains exact `pidof com.android.systemui` PIDs, validates numeric PIDs, verifies `/proc/PID/cmdline` and owner-user UID ranges for every process before terminating any, and sends TERM. It deliberately does not use `am force-stop` on a persistent UI package, `system_server`, reboot, package disabling or data clearing. The service is expected to be restarted by Android, but no physical recovery has been verified. Missing shell tools, SELinux/root denial, missing processes or failed checks return failure rather than broadening the target.
 
 `SystemUiRestarter` additionally validates the calling profile/package, runs only after the positive confirmation action, bounds command waiting to 30s and output reads to 16KiB, deletes temporary cache output, and releases a process-wide `RestartGuard` in finally. Both it and LauncherRestarter share the gate and lifecycle-scoped busy-state observers. Actual su/root commands are never run by tests. Tests cover fixed target/forbidden operations, exit/marker rules, shared-busy rejection, observer cleanup and cancelling the Material confirmation without changing status or acquiring the gate. Rotation while waiting, root-manager authorization, ROM-specific process recovery, gesture/three-button navigation and wallpaper palette changes remain manual tests.
+
+## 1.2-probe native observer + explicit hook report
+
+The independent native payload lives in `app/src/main/cpp`, compiled arm64-only with NDK 27.2.12479018/CMake 3.22.1. `native-runtime/` is the separate root-module template; CI extracts the ELF from the APK, checks its architecture and `zn_module` export, then packages the installable ZIP. The APK does not install or enable the root module automatically. Exact package/main-process guards precede all inline hooking. No animation function replacement exists yet. See [NATIVE-TESTING.md](NATIVE-TESTING.md) for stages, prerequisites, caveats and recovery.
+
+`NativeHookReport` uses the shared root-operation guard, fixed owner-user command, bounded private output, timeout and finally cleanup. It reads only module metadata, launcher PIDs and the specific native log tag. UI consent is separate from review/share; no automatic upload or restart. Native stages remain separate from historical Java APPLIED statuses. Missing/old native evidence never promotes a state to animation success.
+
+Run native policy tests independently with:
+
+```sh
+g++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined \
+  -Iapp/src/main/cpp app/src/test/cpp/probe_policy_test.cpp -o /tmp/hd-probe-test
+/tmp/hd-probe-test
+```
+
+These tests, the ABI export check, and Android CI are not device compatibility verification.

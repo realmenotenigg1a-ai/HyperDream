@@ -169,6 +169,7 @@ public final class MainActivity extends AppCompatActivity {
                             + "\n\n" + HookReports.describe(this)));
             Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show();
         };
+        findViewById(R.id.hook_report_button).setOnClickListener(view -> showHookReportOptions());
         findViewById(R.id.copy_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.copy_hook_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.restart_launcher).setOnClickListener(view -> showRestartConfirmation());
@@ -178,6 +179,58 @@ public final class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             cardStack.post(entrance);
         }
+    }
+
+    private void showHookReportOptions() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.hook_report_title)
+                .setMessage(R.string.hook_report_consent)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setNeutralButton(R.string.report_without_root, (dialog, which) -> collectHookReport(false))
+                .setPositiveButton(R.string.report_with_root, (dialog, which) -> collectHookReport(true))
+                .show();
+    }
+
+    private void collectHookReport(boolean withRoot) {
+        View button = findViewById(R.id.hook_report_button);
+        button.setEnabled(false);
+        Toast.makeText(this, R.string.report_collecting, Toast.LENGTH_SHORT).show();
+        android.content.Context application = getApplicationContext();
+        restartWorker.execute(() -> {
+            String nativeOutput = withRoot ? NativeHookReport.collectRoot(application)
+                    : "Not requested. Native runtime logs require explicit root collection.";
+            String runtime = LauncherRuntimeProbe.describe(application);
+            String report = NativeHookReport.assemble(application, runtime, nativeOutput);
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) { return; }
+                button.setEnabled(true);
+                android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+                TextView text = new TextView(this);
+                int padding = Math.round(20 * getResources().getDisplayMetrics().density);
+                text.setPadding(padding, padding, padding, padding);
+                text.setText(report);
+                text.setTextIsSelectable(true);
+                scroll.addView(text);
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.hook_report_title).setView(scroll)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setNeutralButton(R.string.report_copy, (dialog, which) -> {
+                            getSystemService(ClipboardManager.class).setPrimaryClip(
+                                    ClipData.newPlainText("HyperDream hook report", report));
+                            Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show();
+                        })
+                        .setPositiveButton(R.string.report_share, (dialog, which) -> {
+                            android.content.Intent send = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                            send.setType("text/plain");
+                            send.putExtra(android.content.Intent.EXTRA_SUBJECT, "HyperDream hook report");
+                            send.putExtra(android.content.Intent.EXTRA_TEXT, report);
+                            try { startActivity(android.content.Intent.createChooser(send, getString(R.string.report_share))); }
+                            catch (android.content.ActivityNotFoundException unavailable) {
+                                Toast.makeText(this, R.string.report_no_share_app, Toast.LENGTH_LONG).show();
+                            }
+                        }).show();
+            });
+        });
     }
 
     @Override

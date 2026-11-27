@@ -1,3 +1,5 @@
+> **1.2-probe native test:** adds an independently installable Zygisk Next HYOS Runtime observer ZIP and **Device → Hook report** with explicit root collection, review, Copy and Share. **It does not change native launcher animation timing yet.** Install both the APK and inner native probe ZIP for this diagnostic test. Read [native testing, requirements and recovery](docs/NATIVE-TESTING.md) before installing. Removing the APK does not remove the root module.
+
 <div align="center">
 
 <img src="docs/assets/hyperdream-icon.png" alt="HyperDream app icon" width="192" height="192" />

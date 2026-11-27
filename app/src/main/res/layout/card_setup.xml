@@ -45,6 +45,9 @@
         android:accessibilityLiveRegion="polite"
         android:textIsSelectable="true"
         android:text="@string/runtime_pending" />
+    <TextView style="@style/StudioTitle" android:layout_marginTop="24dp" android:text="@string/native_probe_heading" />
+    <TextView style="@style/StudioBody" android:text="@string/native_probe_details" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/hook_report_button" style="@style/StudioButton" android:text="@string/hook_report_title" />
     <com.google.android.material.button.MaterialButton android:id="@+id/copy_diagnostics" style="@style/StudioButton" android:text="@string/copy_diagnostics" />
     <TextView style="@style/StudioBody" android:layout_marginTop="20dp" android:text="@string/safety_notice" android:textColor="?attr/colorError" />
 </LinearLayout>

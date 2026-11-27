@@ -155,4 +155,14 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="systemui_unavailable">System UI package is unavailable in this profile. No restart requested.</string>
     <string name="systemui_profile">Restart refused outside the owner profile. No restart requested.</string>
     <string name="systemui_failed">Restart was denied or a process/user safety check failed. No successful restart confirmed.</string>
+    <string name="native_probe_heading">Native Runtime test</string>
+    <string name="native_probe_details">Experimental observer only. Install the separate HyperDream Native Runtime Probe ZIP through your root manager, then reboot. Requires arm64 HyperOS Runtime and Zygisk Next API v4 / HYOS API v1. It reports library loading; native animation duration, curves and springs are NOT patched yet. Disable the probe in your root manager to remove it.</string>
+    <string name="hook_report_title">Hook report</string>
+    <string name="hook_report_consent">Generate a report to review, copy or share. Includes device/build versions, launcher library inspection and historical hook status. Root collection additionally reads only the HyperDream native log tag and probe module status. It does not restart anything, change settings or upload automatically. Logs may contain older builds. Native animation changes are not implemented in this test build.</string>
+    <string name="report_without_root">Without root</string>
+    <string name="report_with_root">Collect with root</string>
+    <string name="report_collecting">Collecting hook report…</string>
+    <string name="report_copy">Copy</string>
+    <string name="report_share">Share report</string>
+    <string name="report_no_share_app">No sharing app found. Generate the report again and choose Copy.</string>
 </resources>

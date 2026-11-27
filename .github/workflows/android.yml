@@ -27,12 +27,16 @@ jobs:
             echo "::error title=Android SDK unavailable::Expected sdkmanager at $SDK_MANAGER on the ubuntu-latest runner."
             exit 1
           fi
-          if ! "$SDK_MANAGER" "platforms;android-35" "build-tools;35.0.0" > sdk-setup.log 2>&1; then
+          if ! "$SDK_MANAGER" "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1" > sdk-setup.log 2>&1; then
             cat sdk-setup.log
             MESSAGE=$(tail -n 15 sdk-setup.log | tr '\n' ' ')
             echo "::error title=Android SDK setup failed::${MESSAGE//'%'/'%25'}"
             exit 1
           fi
+      - name: Test native guard and bounded ELF note parser
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iapp/src/main/cpp app/src/test/cpp/probe_policy_test.cpp -o /tmp/hd-probe-test
+          /tmp/hd-probe-test
       - uses: gradle/actions/setup-gradle@v4
       - name: Test, lint, and assemble debug APK
         shell: bash

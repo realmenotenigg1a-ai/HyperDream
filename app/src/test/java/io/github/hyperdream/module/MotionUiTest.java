@@ -54,6 +54,21 @@ public final class MotionUiTest {
     }
 
     @Test
+    public void hookReportRequiresExplicitCollectionChoice() {
+        assertNotNull(activity.findViewById(R.id.hook_report_button));
+        activity.findViewById(R.id.hook_report_button).performClick();
+        androidx.appcompat.app.AlertDialog dialog =
+                (androidx.appcompat.app.AlertDialog) org.robolectric.shadows.ShadowDialog.getLatestDialog();
+        assertTrue(dialog.isShowing());
+        assertEquals(activity.getString(R.string.report_with_root),
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).getText().toString());
+        assertEquals(activity.getString(R.string.report_without_root),
+                dialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL).getText().toString());
+        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick();
+        assertFalse(dialog.isShowing());
+    }
+
+    @Test
     public void controlsPersistActualSettingsAndResetAllOverrides() {
         ((RadioButton) activity.findViewById(R.id.curve_emphasized)).performClick();
         ((CompoundButton) activity.findViewById(R.id.scale_delays)).performClick();
@@ -394,7 +409,7 @@ public final class MotionUiTest {
 
     @Test
     public void materialFourDestinationNavigationIncludesFingerprintPage() {
-        assertEquals("1.1", BuildConfig.VERSION_NAME);
+        assertEquals("1.2-probe", BuildConfig.VERSION_NAME);
         StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
         assertTrue(navigation instanceof com.google.android.material.bottomnavigation.BottomNavigationView);
         assertEquals(4, navigation.getMenu().size());

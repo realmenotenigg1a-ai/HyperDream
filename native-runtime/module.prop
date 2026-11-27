@@ -1,0 +1,6 @@
+id=hyperdream_runtime
+name=HyperDream Native Runtime Probe
+version=1.2-probe
+versionCode=13
+author=HyperDream
+description=Experimental arm64 HyperOS Runtime loader observer. No animation patches yet. Requires Zygisk Next Runtime API v1 / module API v4. Disable this module to remove the observer.
