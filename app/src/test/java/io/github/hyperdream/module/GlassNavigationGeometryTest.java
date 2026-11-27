@@ -36,4 +36,24 @@ public final class GlassNavigationGeometryTest {
         assertEquals(1, geometry.nearestTab(150));
         assertEquals(0, new GlassNavigationGeometry(0, 0, 2).nearestTab(0));
     }
+
+    @Test
+    public void compactFourTabLensAndHitRegionsStayInsideCapsule() {
+        GlassNavigationGeometry geometry = new GlassNavigationGeometry(288, 72, 2, 4);
+        assertEquals(36f, geometry.tabCenter(0), 0f);
+        assertEquals(252f, geometry.tabCenter(3), 0f);
+        float[] position = new float[2];
+        for (int tab = 0; tab < 4; tab++) {
+            assertEquals(tab, geometry.nearestTab(geometry.tabCenter(tab)));
+            geometry.clamp(geometry.tabCenter(tab), 36, position);
+            assertTrue(geometry.containsLens(position[0], position[1]));
+        }
+        assertEquals(3, geometry.nearestTab(10000));
+        for (int x = -500; x < 800; x += 5) {
+            for (int y = -100; y < 200; y += 5) {
+                geometry.clamp(x, y, position);
+                assertTrue(geometry.containsLens(position[0], position[1]));
+            }
+        }
+    }
 }

@@ -7,8 +7,14 @@ final class GlassNavigationGeometry {
     final float barRadius;
     final float lensRadius;
     private final float movementRadius;
+    private final int tabCount;
 
     GlassNavigationGeometry(float width, float height, float inset) {
+        this(width, height, inset, 3);
+    }
+
+    GlassNavigationGeometry(float width, float height, float inset, int tabCount) {
+        this.tabCount = Math.max(1, tabCount);
         this.width = Math.max(0, width);
         this.height = Math.max(0, height);
         barRadius = Math.min(this.width, this.height) / 2;
@@ -25,11 +31,11 @@ final class GlassNavigationGeometry {
     }
 
     float tabCenter(int index) {
-        return width * (Math.max(0, Math.min(2, index)) + 0.5f) / 3;
+        return width * (Math.max(0, Math.min(tabCount - 1, index)) + 0.5f) / tabCount;
     }
 
     int nearestTab(float x) {
-        return width <= 0 ? 0 : Math.max(0, Math.min(2, (int) (x * 3 / width)));
+        return width <= 0 ? 0 : Math.max(0, Math.min(tabCount - 1, (int) (x * tabCount / width)));
     }
 
     boolean containsLens(float x, float y) {

@@ -33,22 +33,6 @@ jobs:
             echo "::error title=Android SDK setup failed::${MESSAGE//'%'/'%25'}"
             exit 1
           fi
-      - name: Validate liquid-glass shader
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libegl1 libgl1
-          python3 -m venv /tmp/hyperdream-shader
-          if ! /tmp/hyperdream-shader/bin/pip install skia-python==144.1 > shader-check.log 2>&1; then
-            cat shader-check.log
-            echo "::error title=Shader dependency setup::$(tail -n 8 shader-check.log | tr '\n' ' ')"
-            exit 1
-          fi
-          if ! /tmp/hyperdream-shader/bin/python .github/scripts/check_glass_shader.py > shader-check.log 2>&1; then
-            cat shader-check.log
-            echo "::error title=Glass shader validation::$(tail -n 12 shader-check.log | tr '\n' ' ')"
-            exit 1
-          fi
-          cat shader-check.log
       - uses: gradle/actions/setup-gradle@v4
       - name: Test, lint, and assemble debug APK
         shell: bash

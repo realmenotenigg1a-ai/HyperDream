@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="124dp"
+        android:paddingBottom="108dp"
         android:fillViewport="true">
 
         <LinearLayout
@@ -73,6 +73,7 @@
 
             <include android:id="@+id/page_spring" layout="@layout/card_spring" />
             <include android:id="@+id/page_motion" layout="@layout/card_motion" />
+            <include android:id="@+id/page_fingerprints" layout="@layout/card_fingerprints" />
             <include android:id="@+id/page_setup" layout="@layout/card_setup" />
             <include android:id="@+id/page_features" layout="@layout/card_features" />
 
@@ -88,10 +89,10 @@
     <io.github.hyperdream.module.LiquidGlassNavigationView
         android:id="@+id/glass_navigation"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="72dp"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginBottom="12dp"
         android:contentDescription="@string/navigation_description" />
 </FrameLayout>

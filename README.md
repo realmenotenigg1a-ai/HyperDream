@@ -57,6 +57,16 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v1.0: compact navigation and Fingerprints
+
+Same HyperDream app and supplied logo, now version **1.0**. This version number is not a launcher-compatibility certification.
+
+- Home spring controls and Animator both show an upfront **“Warning: this section still does not work for launcher animations”** banner. Their local previews are separate; the hook implementation is unchanged.
+- Floating navigation is smaller: 72dp high (previously 90dp), 28dp side margins and 12dp bottom margin, with Home / Animator / Fingerprints / Device destinations. The circular selector remains bounded, labels remain separate from the backdrop, and scroll clearance/system insets are retained.
+- To address the remaining rendering problem, navigation uses one stable Canvas/blurred-bitmap path on every supported Android version. The driver-dependent RuntimeShader path has been removed. A small, prefiltered app-content capture supplies frosted color and subtle lens magnification; simulated edge highlights follow the lens. This is not Apple's renderer or full optical refraction. No physical Xiaomi after-fix result is claimed.
+- **Fingerprints** has three touch-responsive local previews: Ripple, Halo, Spark. Tap the artwork or Replay; style choice is stored locally. Playback stops when leaving the page or backgrounding and shows a still when system animation is disabled.
+- **Fingerprint sensor / lock-screen integration is not implemented.** No biometric permission, fingerprint reading, authentication listener, unlock modification, sensor illumination control or System UI scope is added. Preview selection does not change actual fingerprint effects.
+
 ## v0.8: clearer glass, friendlier studio
 
 This release is **app UI only**; launcher hook behavior is unchanged.

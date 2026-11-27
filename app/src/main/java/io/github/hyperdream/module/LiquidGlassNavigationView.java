@@ -11,7 +11,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextPaint;
@@ -33,7 +32,9 @@ import android.view.animation.OvershootInterpolator;
 public final class LiquidGlassNavigationView extends View {
     public static final int HOME = 0;
     public static final int ANIMATOR = 1;
-    public static final int DEVICE = 2;
+    public static final int FINGERPRINTS = 2;
+    public static final int DEVICE = 3;
+    public static final int TAB_COUNT = 4;
 
     public interface OnTabSelectedListener { void onTabSelected(int tab); }
 
@@ -45,7 +46,7 @@ public final class LiquidGlassNavigationView extends View {
     private final int[] sourceLocation = new int[2];
     private final int[] ownLocation = new int[2];
     private final String[] labels;
-    private final String[] drawnLabels = new String[3];
+    private final String[] drawnLabels = new String[TAB_COUNT];
     private final float density;
     private final int touchSlop;
     private View source;
@@ -67,7 +68,6 @@ public final class LiquidGlassNavigationView extends View {
     private Bitmap blurred;
     private Canvas captureCanvas;
     private int[] pixels, scratch, blurredPixels;
-    private NavigationGlassShader glassShader;
     private GlassNavigationGeometry geometry = new GlassNavigationGeometry(0, 0, 0);
     private ValueAnimator settle;
     private ValueAnimator selectionPulse;
@@ -86,24 +86,12 @@ public final class LiquidGlassNavigationView extends View {
         density = getResources().getDisplayMetrics().density;
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         labels = new String[]{context.getString(R.string.nav_home), context.getString(R.string.tab_motion),
-                context.getString(R.string.tab_device)};
-        text.setTextSize(13 * getResources().getDisplayMetrics().scaledDensity);
+                context.getString(R.string.tab_fingerprints), context.getString(R.string.tab_device)};
+        text.setTextSize(11 * getResources().getDisplayMetrics().scaledDensity);
         text.setTextAlign(Paint.Align.CENTER);
         setFocusable(true);
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-        initializeShader();
-    }
-
-    private void initializeShader() {
-        if (Build.VERSION.SDK_INT >= 33 && glassShader == null) {
-            try {
-                glassShader = new NavigationGlassShader(getContext());
-            } catch (java.io.IOException | RuntimeException | LinkageError unsupported) {
-                // Real captured/blurred bitmap fallback, not a screenshot asset.
-                Log.w("HyperDreamGlass", "AGSL unavailable; using bitmap glass fallback");
-            }
-        }
     }
 
     public void setOnTabSelectedListener(OnTabSelectedListener value) { listener = value; }
@@ -189,7 +177,6 @@ public final class LiquidGlassNavigationView extends View {
 
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        initializeShader();
         paused = false;
         startObserving();
         requestBackdropRefresh();
@@ -212,11 +199,11 @@ public final class LiquidGlassNavigationView extends View {
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         cancelSettle();
-        geometry = new GlassNavigationGeometry(w, h, 2 * density);
+        geometry = new GlassNavigationGeometry(w, h, 2 * density, TAB_COUNT);
         positionLens(geometry.tabCenter(selected), h / 2f);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < TAB_COUNT; i++) {
             drawnLabels[i] = TextUtils.ellipsize(labels[i], text,
-                    Math.max(1, w / 3f - 12 * density), TextUtils.TruncateAt.END).toString();
+                    Math.max(1, w / TAB_COUNT - 12 * density), TextUtils.TruncateAt.END).toString();
         }
         requestBackdropRefresh();
     }
@@ -226,7 +213,7 @@ public final class LiquidGlassNavigationView extends View {
         if (paused || !isAttachedToWindow() || source == null || getWidth() <= 0 || getHeight() <= 0
                 || source.getWidth() <= 0 || source.getHeight() <= 0 || getWindowVisibility() != VISIBLE) { return; }
         lastCapture = SystemClock.uptimeMillis();
-        int width = Math.min(320, getWidth());
+        int width = Math.min(160, getWidth());
         int height = Math.max(1, Math.round(getHeight() * (width / (float) getWidth())));
         if (captured == null || captured.getWidth() != width || captured.getHeight() != height) {
             // Do not recycle bitmaps that may still be in a RenderThread display list.
@@ -260,9 +247,6 @@ public final class LiquidGlassNavigationView extends View {
         int radius = Math.max(1, Math.min(32, Math.round(10 * density * width / getWidth())));
         BackdropBlur.frost(pixels, scratch, blurredPixels, width, height, radius);
         blurred.setPixels(blurredPixels, 0, width, 0, 0, width, height);
-        if (Build.VERSION.SDK_INT >= 33 && glassShader != null) {
-            glassShader.setBackdrop(blurred, width / (float) getWidth(), height / (float) getHeight());
-        }
         invalidate();
     }
 
@@ -272,19 +256,10 @@ public final class LiquidGlassNavigationView extends View {
         if (w <= 0 || h <= 0) { return; }
         paint.setStyle(Paint.Style.FILL);
         paint.setAlpha(255);
-        boolean shaderDrawn = false;
-        if (Build.VERSION.SDK_INT >= 33 && glassShader != null && captured != null && canvas.isHardwareAccelerated()) {
-            try {
-                glassShader.draw(canvas, paint, w, h, lensX, lensY, geometry.lensRadius,
-                        lensX - 36 * density, lensY - 65 * density);
-                shaderDrawn = true;
-            } catch (RuntimeException renderingFailure) {
-                glassShader = null;
-                paint.setShader(null);
-            }
-        }
-        if (!shaderDrawn) { drawBitmapGlass(canvas); }
-        for (int tab = 0; tab < 3; tab++) {
+        // Use one deterministic frosted-bitmap renderer on every Android version.
+        // No RuntimeShader/driver-dependent texture sampling or sparse glyph copies.
+        drawBitmapGlass(canvas);
+        for (int tab = 0; tab < TAB_COUNT; tab++) {
             float cx = geometry.tabCenter(tab);
             float iconY = h * 0.34f;
             int color = tab == selected ? Color.rgb(196, 255, 237) : Color.rgb(231, 239, 248);
@@ -306,8 +281,8 @@ public final class LiquidGlassNavigationView extends View {
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(2 * density);
             paint.setColor(Color.rgb(167, 255, 225));
-            rect.set(getWidth() * focus / 3f + 4 * density, 5 * density,
-                    getWidth() * (focus + 1) / 3f - 4 * density, getHeight() - 5 * density);
+            rect.set(getWidth() * focus / (float) TAB_COUNT + 4 * density, 5 * density,
+                    getWidth() * (focus + 1) / (float) TAB_COUNT - 4 * density, getHeight() - 5 * density);
             canvas.drawRoundRect(rect, 20 * density, 20 * density, paint);
         }
         paint.setStyle(Paint.Style.FILL);
@@ -351,7 +326,7 @@ public final class LiquidGlassNavigationView extends View {
     }
 
     private void drawIcon(Canvas canvas, int tab, float cx, float cy) {
-        float s = 12 * density;
+        float s = 9 * density;
         path.reset();
         if (tab == HOME) {
             path.moveTo(cx - s, cy); path.lineTo(cx, cy - s * 0.85f); path.lineTo(cx + s, cy);
@@ -364,6 +339,12 @@ public final class LiquidGlassNavigationView extends View {
             path.moveTo(cx - s * 0.65f, cy - s); path.lineTo(cx + s, cy);
             path.lineTo(cx - s * 0.65f, cy + s); path.close();
             canvas.drawPath(path, paint);
+        } else if (tab == FINGERPRINTS) {
+            for (int ridge = 0; ridge < 3; ridge++) {
+                float r = s * (0.4f + ridge * 0.32f);
+                rect.set(cx - r, cy - r, cx + r, cy + r);
+                canvas.drawArc(rect, 205, 310, false, paint);
+            }
         } else {
             rect.set(cx - s * 0.62f, cy - s * 1.05f, cx + s * 0.62f, cy + s * 1.05f);
             canvas.drawRoundRect(rect, 4 * density, 4 * density, paint);
@@ -495,10 +476,10 @@ public final class LiquidGlassNavigationView extends View {
                 AccessibilityNodeInfo root = AccessibilityNodeInfo.obtain(LiquidGlassNavigationView.this);
                 onInitializeAccessibilityNodeInfo(root);
                 root.setClassName(getAccessibilityClassName());
-                for (int i = 0; i < 3; i++) { root.addChild(LiquidGlassNavigationView.this, i); }
+                for (int i = 0; i < TAB_COUNT; i++) { root.addChild(LiquidGlassNavigationView.this, i); }
                 return root;
             }
-            if (id < 0 || id > 2) { return null; }
+            if (id < 0 || id >= TAB_COUNT) { return null; }
             AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain();
             node.setSource(LiquidGlassNavigationView.this, id);
             node.setParent(LiquidGlassNavigationView.this);
@@ -514,8 +495,8 @@ public final class LiquidGlassNavigationView extends View {
             node.setSelected(selected == id);
             node.setAccessibilityFocused(accessibilityFocus == id);
             node.setVisibleToUser(isShown());
-            Rect bounds = new Rect(Math.round(getWidth() * id / 3f), 0,
-                    Math.round(getWidth() * (id + 1) / 3f), getHeight());
+            Rect bounds = new Rect(Math.round(getWidth() * id / (float) TAB_COUNT), 0,
+                    Math.round(getWidth() * (id + 1) / (float) TAB_COUNT), getHeight());
             node.setBoundsInParent(bounds);
             getLocationOnScreen(ownLocation);
             bounds.offset(ownLocation[0], ownLocation[1]);
@@ -527,7 +508,7 @@ public final class LiquidGlassNavigationView extends View {
         }
 
         @Override public boolean performAction(int id, int action, Bundle args) {
-            if (id < 0 || id > 2 || !isEnabled()) { return false; }
+            if (id < 0 || id >= TAB_COUNT || !isEnabled()) { return false; }
             if (action == AccessibilityNodeInfo.ACTION_CLICK) {
                 selectTab(id, true); performClick(); return true;
             }

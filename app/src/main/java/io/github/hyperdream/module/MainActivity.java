@@ -33,10 +33,11 @@ public final class MainActivity extends Activity {
     private TextView configurationStatus;
     private final ExecutorService restartWorker = Executors.newSingleThreadExecutor();
     private MotionPreviewView preview;
+    private FingerprintPreviewView fingerprintPreview;
     private LiquidGlassNavigationView navigation;
     private final StudioMotion studioMotion = new StudioMotion();
     private int activeTab = -1;
-    private int[] pageScrolls = new int[3];
+    private int[] pageScrolls = new int[LiquidGlassNavigationView.TAB_COUNT];
     private boolean diagnosticsExpanded;
     private android.view.ViewTreeObserver.OnPreDrawListener pendingScrollRestore;
     private LinearLayout cardStack;
@@ -58,7 +59,12 @@ public final class MainActivity extends Activity {
         root.requestApplyInsets();
         if (savedInstanceState != null) {
             int[] restoredScrolls = savedInstanceState.getIntArray("page_scrolls");
-            if (restoredScrolls != null && restoredScrolls.length == 3) { pageScrolls = restoredScrolls; }
+            if (restoredScrolls != null && restoredScrolls.length == LiquidGlassNavigationView.TAB_COUNT) {
+                pageScrolls = restoredScrolls;
+            } else if (restoredScrolls != null && restoredScrolls.length == 3) {
+                pageScrolls[0] = restoredScrolls[0]; pageScrolls[1] = restoredScrolls[1];
+                pageScrolls[LiquidGlassNavigationView.DEVICE] = restoredScrolls[2];
+            }
             diagnosticsExpanded = savedInstanceState.getBoolean("diagnostics_expanded", false);
         }
         enableDuration = findViewById(R.id.enable_duration);
@@ -68,6 +74,21 @@ public final class MainActivity extends Activity {
         scaleDelays = findViewById(R.id.scale_delays);
         restartStatus = findViewById(R.id.restart_status);
         preview = findViewById(R.id.motion_preview);
+        fingerprintPreview = findViewById(R.id.fingerprint_preview);
+        android.content.SharedPreferences fingerprintSettings = getSharedPreferences("fingerprint_preview", MODE_PRIVATE);
+        String effect = FingerprintPreviewView.sanitize(fingerprintSettings.getString("effect", FingerprintPreviewView.RIPPLE));
+        fingerprintPreview.setEffect(effect);
+        RadioGroup effects = findViewById(R.id.fingerprint_effects);
+        effects.check(FingerprintPreviewView.HALO.equals(effect) ? R.id.fingerprint_halo
+                : FingerprintPreviewView.SPARK.equals(effect) ? R.id.fingerprint_spark : R.id.fingerprint_ripple);
+        effects.setOnCheckedChangeListener((group, id) -> {
+            String selectedEffect = id == R.id.fingerprint_halo ? FingerprintPreviewView.HALO
+                    : id == R.id.fingerprint_spark ? FingerprintPreviewView.SPARK : FingerprintPreviewView.RIPPLE;
+            fingerprintSettings.edit().putString("effect", selectedEffect).apply();
+            fingerprintPreview.setEffect(selectedEffect);
+            if (activeTab == LiquidGlassNavigationView.FINGERPRINTS) { fingerprintPreview.play(); }
+        });
+        findViewById(R.id.replay_fingerprint).setOnClickListener(view -> fingerprintPreview.play());
         cardStack = findViewById(R.id.card_stack);
         TextView identity = findViewById(R.id.build_identity);
         identity.setText(getString(R.string.build_identity, BuildConfig.VERSION_NAME, BuildConfig.BUILD_ID));
@@ -108,6 +129,9 @@ public final class MainActivity extends Activity {
         navigation.setOnTabSelectedListener(tab -> showPage(tab, true));
         int initialTab = savedInstanceState == null ? LiquidGlassNavigationView.HOME
                 : savedInstanceState.getInt("studio_tab", LiquidGlassNavigationView.HOME);
+        if (savedInstanceState != null && savedInstanceState.getInt("nav_tab_count", 3) == 3 && initialTab == 2) {
+            initialTab = LiquidGlassNavigationView.DEVICE;
+        }
         navigation.selectTab(initialTab, false);
         showPage(navigation.getSelectedTab(), false);
         enableDuration.setOnCheckedChangeListener((button, checked) -> save());
@@ -157,6 +181,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle state) {
         state.putInt("studio_tab", navigation.getSelectedTab());
+        state.putInt("nav_tab_count", LiquidGlassNavigationView.TAB_COUNT);
         if (activeTab >= 0) { pageScrolls[activeTab] = findViewById(R.id.studio_scroll).getScrollY(); }
         state.putIntArray("page_scrolls", pageScrolls);
         state.putBoolean("diagnostics_expanded", diagnosticsExpanded);
@@ -168,13 +193,17 @@ public final class MainActivity extends Activity {
         if (activeTab >= 0 && activeTab != tab) { pageScrolls[activeTab] = scroll.getScrollY(); }
         activeTab = tab;
         ((TextView) findViewById(R.id.studio_heading)).setText(tab == LiquidGlassNavigationView.ANIMATOR
-                ? R.string.animator_hero : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_hero : R.string.glass_hero);
+                ? R.string.animator_hero : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.string.fingerprint_hero
+                : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_hero : R.string.glass_hero);
         ((TextView) findViewById(R.id.studio_caption)).setText(tab == LiquidGlassNavigationView.ANIMATOR
-                ? R.string.animator_caption : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_caption : R.string.glass_subtitle);
+                ? R.string.animator_caption : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.string.fingerprint_caption
+                : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_caption : R.string.glass_subtitle);
         preview.stop();
+        fingerprintPreview.stop();
         int selected = tab == LiquidGlassNavigationView.ANIMATOR ? R.id.page_motion
+                : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.id.page_fingerprints
                 : tab == LiquidGlassNavigationView.DEVICE ? R.id.page_setup : R.id.page_spring;
-        for (int id : new int[]{R.id.page_spring, R.id.page_motion, R.id.page_setup, R.id.page_features}) {
+        for (int id : new int[]{R.id.page_spring, R.id.page_motion, R.id.page_setup, R.id.page_features, R.id.page_fingerprints}) {
             View page = findViewById(id);
             page.animate().cancel();
             boolean visible = id == selected || (tab == LiquidGlassNavigationView.DEVICE && id == R.id.page_features);
@@ -436,6 +465,7 @@ public final class MainActivity extends Activity {
             child.setTranslationY(0f);
         }
         preview.stop();
+        fingerprintPreview.stop();
         super.onStop();
     }
 }

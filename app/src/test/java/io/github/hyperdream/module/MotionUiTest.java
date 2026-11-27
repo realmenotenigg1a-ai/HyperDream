@@ -233,10 +233,10 @@ public final class MotionUiTest {
     public void virtualNavigationButtonsAreLabeledAndActionable() {
         LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
         android.view.accessibility.AccessibilityNodeProvider provider = navigation.getAccessibilityNodeProvider();
-        android.view.accessibility.AccessibilityNodeInfo device = provider.createAccessibilityNodeInfo(2);
+        android.view.accessibility.AccessibilityNodeInfo device = provider.createAccessibilityNodeInfo(LiquidGlassNavigationView.DEVICE);
         assertEquals(activity.getString(R.string.tab_device), device.getText().toString());
         assertTrue(device.isClickable());
-        assertTrue(provider.performAction(2, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
+        assertTrue(provider.performAction(LiquidGlassNavigationView.DEVICE, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
         assertEquals(LiquidGlassNavigationView.DEVICE, navigation.getSelectedTab());
         assertFalse(provider.performAction(99, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
     }
@@ -400,5 +400,60 @@ public final class MotionUiTest {
         navigation.selectTab(LiquidGlassNavigationView.DEVICE, false);
         layoutStudio();
         assertEquals(deviceOffset, scroll.getScrollY());
+    }
+
+    @Test
+    public void versionOneAndCompactFourDestinationNavigation() {
+        assertEquals("1.0", BuildConfig.VERSION_NAME);
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        assertEquals(72 * activity.getResources().getDisplayMetrics().density,
+                navigation.getLayoutParams().height, 0.1f);
+        assertEquals(4, navigation.getAccessibilityNodeProvider()
+                .createAccessibilityNodeInfo(View.NO_ID).getChildCount());
+        navigation.selectTab(LiquidGlassNavigationView.FINGERPRINTS, false);
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_fingerprints).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.page_motion).getVisibility());
+        assertEquals(activity.getString(R.string.fingerprint_hero),
+                ((android.widget.TextView) activity.findViewById(R.id.studio_heading)).getText().toString());
+    }
+
+    @Test
+    public void fingerprintStyleIsLocalPersistentAndStopsWhenLeavingPage() {
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        navigation.selectTab(LiquidGlassNavigationView.FINGERPRINTS, false);
+        ((RadioButton) activity.findViewById(R.id.fingerprint_spark)).performClick();
+        FingerprintPreviewView fingerprint = activity.findViewById(R.id.fingerprint_preview);
+        assertEquals(FingerprintPreviewView.SPARK, fingerprint.getEffect());
+        assertFalse(SettingsStore.read(activity).enabled);
+        assertFalse(SettingsStore.readSpring(activity).enabled);
+        fingerprint.performClick();
+        navigation.selectTab(LiquidGlassNavigationView.HOME, false);
+        assertFalse(fingerprint.isPlaying());
+        controller.recreate(); activity = controller.get();
+        assertEquals(FingerprintPreviewView.SPARK,
+                ((FingerprintPreviewView) activity.findViewById(R.id.fingerprint_preview)).getEffect());
+    }
+
+    @Test
+    public void animationWarningsAreDirectChildrenNotHiddenInDisclosure() {
+        for (int id : new int[]{R.id.page_spring, R.id.page_motion}) {
+            android.view.ViewGroup page = activity.findViewById(id);
+            android.widget.TextView warning = (android.widget.TextView) page.getChildAt(0);
+            assertEquals(activity.getString(R.string.animations_not_working), warning.getText().toString());
+            assertEquals(View.VISIBLE, warning.getVisibility());
+        }
+    }
+
+    @Test
+    public void fingerprintPreviewDrawsEachStyleAndSanitizesUnknownValues() {
+        FingerprintPreviewView fingerprint = activity.findViewById(R.id.fingerprint_preview);
+        fingerprint.layout(0, 0, 240, 220);
+        for (String style : new String[]{"ripple", "halo", "spark", "invalid"}) {
+            fingerprint.setEffect(style);
+            fingerprint.draw(new android.graphics.Canvas(android.graphics.Bitmap.createBitmap(240, 220,
+                    android.graphics.Bitmap.Config.ARGB_8888)));
+        }
+        assertEquals(FingerprintPreviewView.RIPPLE, fingerprint.getEffect());
+        fingerprint.stop(); assertFalse(fingerprint.isPlaying());
     }
 }

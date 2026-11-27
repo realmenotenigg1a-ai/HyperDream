@@ -2,6 +2,12 @@
 
 HyperDream is inspired by the customization depth of Home Up, not a port or a claim of feature parity. Home Up varies across releases and devices; the categories below are our proposed work areas, **not an exhaustive or verified inventory of Samsung features**. No Samsung code or assets are included.
 
+## v1.0 status
+
+Launcher animation sections are explicitly marked **not working**; the earlier hook rows below describe implemented experimental code, not successful device behavior. A new **Fingerprints** destination provides Ripple / Halo / Spark **in-app previews only**, with locally saved style selection and reduced-motion/lifecycle handling. Actual fingerprint-sensor effects remain unimplemented. No biometric or lock-screen functionality is altered.
+
+The compact 72dp bar has four accessible destinations and uses frosted bitmap rendering consistently across Android versions; the experimental AGSL path has been removed to avoid the repeated rendering issue. Supplied logo and black background remain.
+
 ## Implemented
 
 | Feature | What it actually does | Verification |

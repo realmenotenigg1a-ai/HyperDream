@@ -46,7 +46,7 @@
     <string name="feature_motion_body">A guarded Java spring-provider adapter is now in the Spring tab. Native transition support, custom curve editing, genie effects, and per-app profiles remain unimplemented.</string>
     <string name="feature_sharing_title">Layouts and sharing · Research needed</string>
     <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
-    <string name="glass_disclaimer">Floating navigation samples app content for blur and refraction. Highlights are simulated, not Apple’s proprietary renderer.
+    <string name="glass_disclaimer">Floating navigation uses a frosted app-content capture with simulated highlights. It does not use Apple’s renderer.
 Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="curve_heading">Choose how it moves</string>
     <string name="curve_system">Original — preserve launcher easing</string>
@@ -76,7 +76,7 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="copy_diagnostics">Copy build details</string>
     <string name="build_identity">v%1$s · build %2$s</string>
     <string name="nav_home">Home</string>
-    <string name="navigation_description">Floating navigation. Home opens spring controls. Drag the glass selection lens within the bar or tap a destination.</string>
+    <string name="navigation_description">Floating navigation: Home, Animator, Fingerprints, Device. Drag the selection lens within the bar or tap a destination.</string>
     <string name="tab_motion">Animator</string>
     <string name="tab_device">Device</string>
     <string name="spring_title">Spring studio</string>
@@ -128,4 +128,18 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="collapsed">Collapsed</string>
     <string name="autosave_hint">Changes save automatically on this device.</string>
     <string name="saved_locally">Saved on this device · launcher application unverified.</string>
+    <string name="animations_not_working">Warning: this section still does not work for launcher animations. Local previews work only inside HyperDream.</string>
+    <string name="tab_fingerprints">Fingerprints</string>
+    <string name="fingerprint_hero">A touch of character.</string>
+    <string name="fingerprint_caption">Explore fingerprint-style effects in a local touch preview.</string>
+    <string name="fingerprint_title">Fingerprint effects</string>
+    <string name="fingerprint_scope">PREVIEW ONLY · Actual fingerprint-sensor and lock-screen effects are not connected yet.</string>
+    <string name="fingerprint_preview_accessibility">Local fingerprint effect preview. Double tap to replay. This is not the fingerprint sensor.</string>
+    <string name="fingerprint_replay">Replay touch effect</string>
+    <string name="fingerprint_choose">Choose a preview style</string>
+    <string name="fingerprint_ripple">Ripple · expanding mint rings</string>
+    <string name="fingerprint_halo">Halo · a soft cyan ring</string>
+    <string name="fingerprint_spark">Spark · a violet burst</string>
+    <string name="fingerprint_safety">Your choice is saved for this preview only. HyperDream does not read fingerprints, observe authentication, change unlock security, or control sensor illumination. No biometric permission is requested.</string>
+    <string name="fingerprint_still">System animations are off. Showing a still fingerprint-style effect.</string>
 </resources>
