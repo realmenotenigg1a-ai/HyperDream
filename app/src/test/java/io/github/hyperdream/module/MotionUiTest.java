@@ -168,4 +168,29 @@ public final class MotionUiTest {
         report.putString("diagnostics", "x".repeat(2049));
         HookReports.record(activity, report);
     }
+
+    @Test
+    public void screenUsesPlainBlackBackgroundWithoutDecorativeBackdrop() {
+        android.graphics.drawable.Drawable background = activity.findViewById(R.id.screen_root).getBackground();
+        assertTrue(background instanceof android.graphics.drawable.ColorDrawable);
+        assertEquals(android.graphics.Color.BLACK,
+                ((android.graphics.drawable.ColorDrawable) background).getColor());
+    }
+
+    @Test
+    public void springReportShortcutCopiesBuildAndLatestHookEvidence() {
+        Bundle report = new Bundle();
+        report.putString("status", "OBSERVED");
+        report.putString("build", BuildConfig.VERSION_NAME + "/" + BuildConfig.BUILD_ID);
+        report.putString("snapshot", new SpringSettings(false, 1, 1).snapshot());
+        report.putString("diagnostics", "Provider calls observed: 5");
+        HookReports.record(activity, report);
+        activity.findViewById(R.id.copy_hook_diagnostics).performClick();
+        android.content.ClipboardManager clipboard = activity.getSystemService(android.content.ClipboardManager.class);
+        assertNotNull(clipboard.getPrimaryClip());
+        String copied = clipboard.getPrimaryClip().getItemAt(0).coerceToText(activity).toString();
+        assertTrue(copied.contains(BuildConfig.VERSION_NAME));
+        assertTrue(copied.contains(BuildConfig.BUILD_ID));
+        assertTrue(copied.contains("Provider calls observed: 5"));
+    }
 }

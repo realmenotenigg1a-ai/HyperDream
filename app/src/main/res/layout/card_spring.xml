@@ -32,6 +32,7 @@
     <TextView style="@style/GlassBody" android:text="@string/spring_compatibility" android:textColor="@color/warning" />
     <TextView style="@style/GlassBody" android:text="@string/diagnostic_protocol" android:textSize="13sp" />
     <Button android:id="@+id/refresh_hooks" style="@style/GlassButton" android:text="@string/refresh_hooks" />
+    <Button android:id="@+id/copy_hook_diagnostics" style="@style/GlassButton" android:text="@string/copy_hook_diagnostics" />
     <TextView
         android:id="@+id/hook_report"
         style="@style/GlassBody"

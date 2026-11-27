@@ -57,6 +57,10 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.6.1: plain background and easier report copying
+
+The screen and system-bar background are solid black; the decorative gradient backdrop has been removed. A **Copy diagnostic report** shortcut in the Spring tab copies the same build/runtime/hook evidence as the Device-page action. This is a UI/accessibility update, **not a claim that launcher compatibility has been fixed**. The spring hook is unchanged from v0.6.
+
 ## v0.6 diagnostic: investigate registered-but-unused hooks
 
 This build does **not** claim to fix native HyperOS 4 transitions. It adds evidence needed when the Java hook registers but no effect is observed:
@@ -99,7 +103,7 @@ The experimental controls hook **Android `ValueAnimator` duration, interpolator,
 
 ### Glass-inspired motion studio
 
-The settings app now uses a blue/teal gradient backdrop, translucent rounded cards, edge highlights, and ripple/soft-press controls. This is a **liquid-glass-inspired visual treatment**, not live background blur or optical refraction.
+The settings app uses a plain black background with no decorative backdrop or glow. Translucent rounded cards, edge highlights, and ripple/soft-press controls remain. This is a **liquid-glass-inspired visual treatment**, not live background blur or optical refraction.
 
 A replayable local motion illustration shows the selected duration, easing, and optional delay settings without requiring LSPosed. It is labeled as an illustration and works even when the module control is off. The selected preset is also wired to launcher interpolator setter calls, but the preview is not proof any particular HyperOS transition uses them. Original easing in the preview uses demonstration curves, not the device's curves. Entry transitions and preview playback respect the system animation-off setting, and playback stops when the app leaves the foreground.
 

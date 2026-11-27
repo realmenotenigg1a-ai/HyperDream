@@ -17,7 +17,7 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 | Device/build report | Locally display/copy Android build and launcher version | No automatic upload or claim of HyperOS verification |
 | Duration presets | 0.5×, 0.75×, 1×, 1.5× | Settings persisted privately; restart launcher or reboot to apply |
 | Restore defaults | Saves disabled / 1× / original curve / unscaled delays | Launcher restart or reboot required to remove a running process's existing hook |
-| Glass-inspired settings UI | Gradient backdrop, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; no live blur/refraction |
+| Settings UI | Plain black background, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; no live blur/refraction |
 | In-app motion | Staggered entry and a replayable icon-to-card illustration | Local only; never used as proof the launcher hook works |
 | Reduced-motion behavior | Skips entry motion and shows a still preview when system animator duration scale is zero | Device accessibility verification still needed |
 

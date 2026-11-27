@@ -14,6 +14,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -106,12 +107,15 @@ public final class MainActivity extends Activity {
                 if (!isFinishing() && !isDestroyed()) { runtimeDetails.setText(runtime); }
             });
         });
-        findViewById(R.id.copy_diagnostics).setOnClickListener(view -> {
+        View.OnClickListener copyDiagnostics = view -> {
             ClipboardManager clipboard = getSystemService(ClipboardManager.class);
             clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name),
                     DeviceDiagnostics.describe(this) + "\n\n" + runtimeDetails.getText()
                             + "\n\n" + HookReports.describe(this)));
-        });
+            Toast.makeText(this, R.string.diagnostics_copied, Toast.LENGTH_SHORT).show();
+        };
+        findViewById(R.id.copy_diagnostics).setOnClickListener(copyDiagnostics);
+        findViewById(R.id.copy_hook_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.restart_launcher).setOnClickListener(view -> new AlertDialog.Builder(this)
                 .setTitle(R.string.restart_launcher)
                 .setMessage(R.string.restart_confirmation)

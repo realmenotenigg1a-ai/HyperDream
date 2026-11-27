@@ -67,7 +67,7 @@ Inspect an actual target launcher APK and document the class/method signatures a
 
 The Android settings app is part of the LSPosed APK, not a separate requirement to convert the module into an app. `MainActivity` edits real duration, easing, and delay settings and renders a roadmap for features that are not implemented.
 
-- `glass_backdrop.xml` and `glass_panel.xml` provide static gradients, translucent fills, and highlights. There is no expensive continuously running blur, optical shader, or live wallpaper sampling.
+- The root and system bars use solid black `app_background`; the unused decorative backdrop was removed in v0.6.1. `glass_panel.xml` still provides translucent card fills and highlights. There is no expensive continuously running blur, optical shader, or live wallpaper sampling.
 - `MotionPreviewView` draws an abstract desktop and animates a local icon/card pair. It uses the selected duration, curve, and delay settings but intentionally ignores the enable switch, as labeled in the interface. It never calls the launcher or validates hook activation.
 - `ValueAnimator.areAnimatorsEnabled()` skips entry motion and substitutes a still preview when global animation duration scale is zero. Standard Android animation scaling otherwise applies to in-app playback.
 - Entry animations are staggered once on a fresh Activity creation. `onStop` cancels them, restores visible card state, removes pending entry callbacks, and stops preview playback; view detachment also stops playback. There is no perpetual animation loop.
@@ -104,3 +104,9 @@ Tests use structural fixture classes, not decompiled HyperOS code or an actual h
 `NativeLibraryProbe` checks ZIP directory entries for three known Flutter-related library names in four ABIs across at most 32 installed APK paths. It reads no library payload, extracts nothing, and executes no native code. Evidence is capped at twelve entries. Unreadable paths are marked partial. The result is only library-presence evidence; a matching basename is not ELF validation, signature verification, active-runtime detection, or a reason to install native hooks. The scan runs on the activity worker and its output is included only in user-initiated diagnostics copying.
 
 Synthetic ZIP/counter tests cover split-library discovery, partial scans, input bounds, filtered/exception/empty/replaced distinctions, and bounded sampling. Robolectric tests cover OBSERVED report rendering and oversized-payload rejection. These are not real launcher/Xposed tests.
+
+## Plain background and report shortcut (v0.6.1)
+
+The root layout references a single solid black color shared with the window and system-bar theme attributes. No backdrop drawable or decorative background layer remains. Cards and the explicitly local motion preview retain their existing styling.
+
+Spring → Copy diagnostic report and Device → Copy build details share one click handler; both copy current build/runtime details and the latest stored hook report. Neither initiates a hook, changes settings, or uploads data. A toast confirms the copy so a user can paste the text into chat without navigating to another page. Robolectric tests check the solid background and shortcut clipboard contents.

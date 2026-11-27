@@ -108,6 +108,8 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="runtime_scan_complete">Base and accessible split APK paths checked. ZIP names/sizes/CRC32 are diagnostic metadata, not signature verification. No libraries were extracted, executed, or uploaded.</string>
     <string name="runtime_scan_partial">Inspection was incomplete or a path was unreadable. Do not treat missing library entries as evidence that native code is absent.</string>
     <string name="runtime_unavailable">Installed launcher runtime metadata is unavailable. No native/Java compatibility conclusion can be drawn.</string>
+    <string name="copy_hook_diagnostics">Copy diagnostic report</string>
+    <string name="diagnostics_copied">Report copied. Paste it into the chat.</string>
     <string-array name="xposed_scope">
         <item>com.miui.home</item>
     </string-array>
