@@ -1,8 +1,11 @@
 package io.github.hyperdream.module;
 
 import android.animation.ValueAnimator;
-import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.color.DynamicColors;
+import com.google.android.material.slider.Slider;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.os.Bundle;
@@ -11,8 +14,7 @@ import android.view.WindowInsets;
 import android.view.animation.PathInterpolator;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.Switch;
-import android.widget.SeekBar;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,24 +22,24 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /** Settings editor and local motion lab, not an activation detector. */
-public final class MainActivity extends Activity {
-    private Switch enableDuration;
+public final class MainActivity extends AppCompatActivity {
+    private CompoundButton enableDuration;
     private RadioGroup durationPresets;
-    private Switch enableSpring;
-    private SeekBar springResponse;
-    private SeekBar springDamping;
+    private CompoundButton enableSpring;
+    private Slider springResponse;
+    private Slider springDamping;
     private TextView hookReport;
     private RadioGroup curvePresets;
-    private Switch scaleDelays;
+    private CompoundButton scaleDelays;
     private TextView restartStatus;
     private TextView configurationStatus;
     private final ExecutorService restartWorker = Executors.newSingleThreadExecutor();
     private MotionPreviewView preview;
     private FingerprintPreviewView fingerprintPreview;
-    private LiquidGlassNavigationView navigation;
+    private StudioNavigationView navigation;
     private final StudioMotion studioMotion = new StudioMotion();
     private int activeTab = -1;
-    private int[] pageScrolls = new int[LiquidGlassNavigationView.TAB_COUNT];
+    private int[] pageScrolls = new int[StudioNavigationView.TAB_COUNT];
     private boolean diagnosticsExpanded;
     private android.view.ViewTreeObserver.OnPreDrawListener pendingScrollRestore;
     private LinearLayout cardStack;
@@ -46,6 +48,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        DynamicColors.applyToActivityIfAvailable(this);
         super.onCreate(savedInstanceState);
         getWindow().setDecorFitsSystemWindows(false);
         setContentView(R.layout.activity_main);
@@ -59,11 +62,11 @@ public final class MainActivity extends Activity {
         root.requestApplyInsets();
         if (savedInstanceState != null) {
             int[] restoredScrolls = savedInstanceState.getIntArray("page_scrolls");
-            if (restoredScrolls != null && restoredScrolls.length == LiquidGlassNavigationView.TAB_COUNT) {
+            if (restoredScrolls != null && restoredScrolls.length == StudioNavigationView.TAB_COUNT) {
                 pageScrolls = restoredScrolls;
             } else if (restoredScrolls != null && restoredScrolls.length == 3) {
                 pageScrolls[0] = restoredScrolls[0]; pageScrolls[1] = restoredScrolls[1];
-                pageScrolls[LiquidGlassNavigationView.DEVICE] = restoredScrolls[2];
+                pageScrolls[StudioNavigationView.DEVICE] = restoredScrolls[2];
             }
             diagnosticsExpanded = savedInstanceState.getBoolean("diagnostics_expanded", false);
         }
@@ -86,7 +89,7 @@ public final class MainActivity extends Activity {
                     : id == R.id.fingerprint_spark ? FingerprintPreviewView.SPARK : FingerprintPreviewView.RIPPLE;
             fingerprintSettings.edit().putString("effect", selectedEffect).apply();
             fingerprintPreview.setEffect(selectedEffect);
-            if (activeTab == LiquidGlassNavigationView.FINGERPRINTS) { fingerprintPreview.play(); }
+            if (activeTab == StudioNavigationView.FINGERPRINTS) { fingerprintPreview.play(); }
         });
         findViewById(R.id.replay_fingerprint).setOnClickListener(view -> fingerprintPreview.play());
         cardStack = findViewById(R.id.card_stack);
@@ -99,18 +102,20 @@ public final class MainActivity extends Activity {
         bind(SettingsStore.read(this));
         bindSpring(SettingsStore.readSpring(this));
         enableSpring.setOnCheckedChangeListener((button, checked) -> saveSpring());
-        SeekBar.OnSeekBarChangeListener springListener = new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
-                updateSpringLabels();
-                if (fromUser) { saveSpring(); }
-            }
-            @Override public void onStartTrackingTouch(SeekBar bar) {}
-            @Override public void onStopTrackingTouch(SeekBar bar) {
+        Slider.OnChangeListener springListener = (slider, value, fromUser) -> {
+            updateSpringLabels();
+            if (fromUser) { saveSpring(); }
+        };
+        springResponse.addOnChangeListener(springListener);
+        springDamping.addOnChangeListener(springListener);
+        Slider.OnSliderTouchListener sliderTouch = new Slider.OnSliderTouchListener() {
+            @Override public void onStartTrackingTouch(Slider slider) {}
+            @Override public void onStopTrackingTouch(Slider slider) {
                 StudioMotion.acknowledge(findViewById(R.id.spring_saved));
             }
         };
-        springResponse.setOnSeekBarChangeListener(springListener);
-        springDamping.setOnSeekBarChangeListener(springListener);
+        springResponse.addOnSliderTouchListener(sliderTouch);
+        springDamping.addOnSliderTouchListener(sliderTouch);
         findViewById(R.id.reset_spring).setOnClickListener(view -> {
             bindSpring(new SpringSettings(false, 1f, 1f));
             saveSpring();
@@ -124,13 +129,14 @@ public final class MainActivity extends Activity {
             diagnosticsExpanded = !diagnosticsExpanded;
             updateDiagnosticDisclosure(true);
         });
-        navigation = findViewById(R.id.glass_navigation);
-        navigation.setBackdropSource(findViewById(R.id.studio_scroll));
+        navigation = findViewById(R.id.studio_navigation);
+        // Root applies system-bar insets once; do not add a second navigation inset.
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(navigation, (view, insets) -> insets);
         navigation.setOnTabSelectedListener(tab -> showPage(tab, true));
-        int initialTab = savedInstanceState == null ? LiquidGlassNavigationView.HOME
-                : savedInstanceState.getInt("studio_tab", LiquidGlassNavigationView.HOME);
+        int initialTab = savedInstanceState == null ? StudioNavigationView.HOME
+                : savedInstanceState.getInt("studio_tab", StudioNavigationView.HOME);
         if (savedInstanceState != null && savedInstanceState.getInt("nav_tab_count", 3) == 3 && initialTab == 2) {
-            initialTab = LiquidGlassNavigationView.DEVICE;
+            initialTab = StudioNavigationView.DEVICE;
         }
         navigation.selectTab(initialTab, false);
         showPage(navigation.getSelectedTab(), false);
@@ -163,6 +169,7 @@ public final class MainActivity extends Activity {
         findViewById(R.id.copy_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.copy_hook_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.restart_launcher).setOnClickListener(view -> showRestartConfirmation());
+        findViewById(R.id.restart_systemui).setOnClickListener(view -> showSystemUiConfirmation());
         studioMotion.bind(root);
         studioMotion.refresh();
         if (savedInstanceState == null) {
@@ -175,13 +182,13 @@ public final class MainActivity extends Activity {
         super.onResume();
         refreshHookReport();
         studioMotion.refresh();
-        if (navigation != null) { navigation.resumeGlass(); }
+        setRestartButtonsEnabled(!RestartGuard.RUNNING.get());
     }
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
         state.putInt("studio_tab", navigation.getSelectedTab());
-        state.putInt("nav_tab_count", LiquidGlassNavigationView.TAB_COUNT);
+        state.putInt("nav_tab_count", StudioNavigationView.TAB_COUNT);
         if (activeTab >= 0) { pageScrolls[activeTab] = findViewById(R.id.studio_scroll).getScrollY(); }
         state.putIntArray("page_scrolls", pageScrolls);
         state.putBoolean("diagnostics_expanded", diagnosticsExpanded);
@@ -192,21 +199,21 @@ public final class MainActivity extends Activity {
         android.widget.ScrollView scroll = findViewById(R.id.studio_scroll);
         if (activeTab >= 0 && activeTab != tab) { pageScrolls[activeTab] = scroll.getScrollY(); }
         activeTab = tab;
-        ((TextView) findViewById(R.id.studio_heading)).setText(tab == LiquidGlassNavigationView.ANIMATOR
-                ? R.string.animator_hero : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.string.fingerprint_hero
-                : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_hero : R.string.glass_hero);
-        ((TextView) findViewById(R.id.studio_caption)).setText(tab == LiquidGlassNavigationView.ANIMATOR
-                ? R.string.animator_caption : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.string.fingerprint_caption
-                : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_caption : R.string.glass_subtitle);
+        ((TextView) findViewById(R.id.studio_heading)).setText(tab == StudioNavigationView.ANIMATOR
+                ? R.string.animator_hero : tab == StudioNavigationView.FINGERPRINTS ? R.string.fingerprint_hero
+                : tab == StudioNavigationView.DEVICE ? R.string.device_hero : R.string.glass_hero);
+        ((TextView) findViewById(R.id.studio_caption)).setText(tab == StudioNavigationView.ANIMATOR
+                ? R.string.animator_caption : tab == StudioNavigationView.FINGERPRINTS ? R.string.fingerprint_caption
+                : tab == StudioNavigationView.DEVICE ? R.string.device_caption : R.string.glass_subtitle);
         preview.stop();
         fingerprintPreview.stop();
-        int selected = tab == LiquidGlassNavigationView.ANIMATOR ? R.id.page_motion
-                : tab == LiquidGlassNavigationView.FINGERPRINTS ? R.id.page_fingerprints
-                : tab == LiquidGlassNavigationView.DEVICE ? R.id.page_setup : R.id.page_spring;
+        int selected = tab == StudioNavigationView.ANIMATOR ? R.id.page_motion
+                : tab == StudioNavigationView.FINGERPRINTS ? R.id.page_fingerprints
+                : tab == StudioNavigationView.DEVICE ? R.id.page_setup : R.id.page_spring;
         for (int id : new int[]{R.id.page_spring, R.id.page_motion, R.id.page_setup, R.id.page_features, R.id.page_fingerprints}) {
             View page = findViewById(id);
             page.animate().cancel();
-            boolean visible = id == selected || (tab == LiquidGlassNavigationView.DEVICE && id == R.id.page_features);
+            boolean visible = id == selected || (tab == StudioNavigationView.DEVICE && id == R.id.page_features);
             page.setVisibility(visible ? View.VISIBLE : View.GONE);
             page.setAlpha(1f);
             page.setTranslationY(0f);
@@ -215,7 +222,7 @@ public final class MainActivity extends Activity {
                 page.setTranslationY(10 * getResources().getDisplayMetrics().density);
                 page.animate().alpha(1f).translationY(0f).setDuration(220).setStartDelay(0)
                         .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f))
-                        .withEndAction(navigation::requestBackdropRefresh).start();
+                        .start();
             }
         }
         cancelScrollRestore();
@@ -225,13 +232,11 @@ public final class MainActivity extends Activity {
             cancelScrollRestore();
             if (activeTab == tab && !isDestroyed()) {
                 scroll.scrollTo(0, Math.max(0, pageScrolls[tab]));
-                navigation.requestBackdropRefresh();
             }
             return true;
         };
         scroll.getViewTreeObserver().addOnPreDrawListener(pendingScrollRestore);
         if (animate) { StudioMotion.acknowledge(findViewById(R.id.studio_heading)); }
-        navigation.requestBackdropRefresh();
         refreshHookReport();
     }
 
@@ -257,12 +262,11 @@ public final class MainActivity extends Activity {
             details.setTranslationY(6 * getResources().getDisplayMetrics().density);
             details.animate().alpha(1).translationY(0).setDuration(200).setStartDelay(0).start();
         }
-        if (navigation != null) { navigation.requestBackdropRefresh(); }
     }
 
     private void showRestartConfirmation() {
         StudioMotion dialogMotion = new StudioMotion();
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.restart_launcher)
                 .setMessage(R.string.restart_confirmation)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -276,21 +280,60 @@ public final class MainActivity extends Activity {
         dialog.show();
     }
 
+    private void setRestartButtonsEnabled(boolean enabled) {
+        findViewById(R.id.restart_launcher).setEnabled(enabled);
+        findViewById(R.id.restart_systemui).setEnabled(enabled);
+    }
+
+    private void showSystemUiConfirmation() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.restart_systemui)
+                .setMessage(R.string.systemui_confirmation)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.systemui_confirm, (dialog, which) -> restartSystemUi())
+                .show();
+    }
+
+    private void restartSystemUi() {
+        setRestartButtonsEnabled(false);
+        TextView status = findViewById(R.id.systemui_restart_status);
+        status.setText(R.string.systemui_running);
+        android.content.Context application = getApplicationContext();
+        restartWorker.execute(() -> {
+            SystemUiRestarter.Result result = SystemUiRestarter.restart(application);
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) { return; }
+                setRestartButtonsEnabled(true);
+                int message;
+                switch (result) {
+                    case REQUEST_COMPLETED: message = R.string.systemui_requested; break;
+                    case ROOT_UNAVAILABLE: message = R.string.systemui_no_root; break;
+                    case TIMEOUT: message = R.string.systemui_timeout; break;
+                    case PACKAGE_UNAVAILABLE: message = R.string.systemui_unavailable; break;
+                    case PROFILE_UNSUPPORTED: message = R.string.systemui_profile; break;
+                    case BUSY: message = R.string.restart_busy; break;
+                    default: message = R.string.systemui_failed;
+                }
+                status.setText(message);
+            });
+        });
+    }
+
     private void bindSpring(SpringSettings settings) {
         binding = true;
         enableSpring.setChecked(settings.enabled);
-        springResponse.setProgress(Math.round((settings.responseMultiplier - 0.5f) * 20));
-        springDamping.setProgress(Math.round((settings.damping - 0.5f) * 20));
+        springResponse.setValue(Math.round((settings.responseMultiplier - 0.5f) * 20));
+        springDamping.setValue(Math.round((settings.damping - 0.5f) * 20));
         updateSpringLabels();
         binding = false;
     }
 
     private float responseValue() {
-        return Math.round((0.5f + springResponse.getProgress() * 0.05f) * 100) / 100f;
+        return Math.round((0.5f + springResponse.getValue() * 0.05f) * 100) / 100f;
     }
 
     private float dampingValue() {
-        return Math.round((0.5f + springDamping.getProgress() * 0.05f) * 100) / 100f;
+        return Math.round((0.5f + springDamping.getValue() * 0.05f) * 100) / 100f;
     }
 
     private void updateSpringLabels() {
@@ -367,8 +410,7 @@ public final class MainActivity extends Activity {
     }
 
     private void restartLauncher() {
-        View button = findViewById(R.id.restart_launcher);
-        button.setEnabled(false);
+        setRestartButtonsEnabled(false);
         restartStatus.setText(R.string.restart_running);
         android.content.Context app = getApplicationContext();
         restartWorker.execute(() -> {
@@ -377,7 +419,7 @@ public final class MainActivity extends Activity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
-                button.setEnabled(true);
+                setRestartButtonsEnabled(true);
                 int message;
                 switch (result) {
                     case REQUEST_COMPLETED: message = R.string.restart_completed; break;
@@ -435,7 +477,7 @@ public final class MainActivity extends Activity {
             child.animate().alpha(1f).translationY(0f)
                     .setDuration(320).setStartDelay(Math.min(i * 35L, 210L))
                     .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f))
-                    .withEndAction(navigation::requestBackdropRefresh).start();
+                    .start();
         }
     }
 
@@ -456,7 +498,6 @@ public final class MainActivity extends Activity {
             View view = findViewById(id);
             view.animate().cancel(); view.setAlpha(1); view.setTranslationY(0);
         }
-        navigation.pauseGlass();
         cardStack.removeCallbacks(entrance);
         for (int i = 0; i < cardStack.getChildCount(); i++) {
             View child = cardStack.getChildAt(i);

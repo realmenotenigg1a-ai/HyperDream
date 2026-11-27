@@ -8,7 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.PathInterpolator;
 import android.widget.Button;
-import android.widget.SeekBar;
+import android.widget.CompoundButton;
+import com.google.android.material.slider.Slider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ final class StudioMotion {
     private final List<View> controls = new ArrayList<>();
 
     void bind(View view) {
-        if (view instanceof Button || view instanceof SeekBar) { controls.add(view); }
+        if (view instanceof Button || view instanceof CompoundButton || view instanceof Slider) { controls.add(view); }
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             for (int i = 0; i < group.getChildCount(); i++) { bind(group.getChildAt(i)); }

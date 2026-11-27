@@ -4,6 +4,8 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import com.google.android.material.color.MaterialColors;
+import androidx.core.graphics.ColorUtils;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -18,19 +20,11 @@ import android.view.animation.PathInterpolator;
 public final class MotionPreviewView extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
-    private LinearGradient backdrop;
     private AnimatorSet playback;
     private float progress;
 
     public MotionPreviewView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
-        super.onSizeChanged(width, height, oldWidth, oldHeight);
-        backdrop = new LinearGradient(0, 0, width, height,
-                Color.rgb(36, 52, 84), Color.rgb(13, 39, 48), Shader.TileMode.CLAMP);
     }
 
     public void play(float durationScale, String curve, boolean scaleDelays) {
@@ -88,13 +82,13 @@ public final class MotionPreviewView extends View {
         float height = getHeight();
         float unit = Math.min(width / 300f, height / 180f);
         float inset = 16f * unit;
-        paint.setShader(backdrop);
+        paint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainerHighest, 0));
         rect.set(0, 0, width, height);
         canvas.drawRoundRect(rect, 22 * unit, 22 * unit, paint);
         paint.setShader(null);
 
         // A deliberately abstract desktop, not a reproduction of a supported launcher layout.
-        paint.setColor(Color.argb(65, 190, 221, 242));
+        paint.setColor(ColorUtils.setAlphaComponent(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, 0), 45));
         for (int row = 0; row < 2; row++) {
             for (int column = 0; column < 4; column++) {
                 float x = inset + column * (width - inset * 2 - 30 * unit) / 3;
@@ -110,7 +104,7 @@ public final class MotionPreviewView extends View {
         float bottom = height - inset;
         float radius = mix(12 * unit, 18 * unit, progress);
         rect.set(inset, top, right, bottom);
-        paint.setColor(Color.rgb(167, 255, 225));
+        paint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary, 0));
         canvas.drawRoundRect(rect, radius, radius, paint);
 
         // Inner content appears only when there is room for it.
@@ -118,7 +112,7 @@ public final class MotionPreviewView extends View {
         if (contentAlpha > 0) {
             canvas.save();
             canvas.clipRect(inset, top, right, bottom);
-            paint.setColor(Color.argb((int) (230 * contentAlpha), 13, 45, 54));
+            paint.setColor(ColorUtils.setAlphaComponent(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary, 0), (int) (230 * contentAlpha)));
             for (int row = 0; row < 3; row++) {
                 float y = top + (26 + row * 25) * unit;
                 float barWidth = (right - inset - 32 * unit) * (row == 0 ? 0.62f : 0.88f);
@@ -127,7 +121,7 @@ public final class MotionPreviewView extends View {
             }
             canvas.restore();
         }
-        paint.setColor(Color.argb(155, 222, 239, 255));
+        paint.setColor(ColorUtils.setAlphaComponent(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, 0), 155));
         rect.set(width * 0.4f, height - 7 * unit, width * 0.6f, height - 4 * unit);
         canvas.drawRoundRect(rect, 2 * unit, 2 * unit, paint);
     }

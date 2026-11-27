@@ -2,6 +2,8 @@ package io.github.hyperdream.module;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import com.google.android.material.color.MaterialColors;
+import androidx.core.graphics.ColorUtils;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -78,13 +80,13 @@ public final class FingerprintPreviewView extends View {
         float cx = getWidth() / 2f, cy = getHeight() / 2f;
         float unit = Math.min(getWidth() / 240f, getHeight() / 220f);
         if (unit <= 0) { return; }
-        paint.setStyle(Paint.Style.FILL); paint.setColor(0xFF0B151C);
+        paint.setStyle(Paint.Style.FILL); paint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainerHighest, 0));
         ring.set(0, 0, getWidth(), getHeight());
         canvas.drawRoundRect(ring, 24 * unit, 24 * unit, paint);
         paint.setStyle(Paint.Style.STROKE); paint.setStrokeCap(Paint.Cap.ROUND);
         if (progress >= 0 && progress < 1) {
             if (SPARK.equals(effect)) {
-                paint.setColor(Color.rgb(183, 158, 255));
+                paint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorTertiary, 0));
                 paint.setStrokeWidth(3 * unit); paint.setAlpha((int) ((1 - progress) * 230));
                 for (int i = 0; i < 16; i++) {
                     double angle = i * Math.PI / 8 + progress * 0.2;
@@ -97,20 +99,20 @@ public final class FingerprintPreviewView extends View {
                 for (int i = 0; i < count; i++) {
                     float phase = progress - i * 0.16f;
                     if (phase < 0) { continue; }
-                    paint.setColor(HALO.equals(effect) ? 0xFF7EDFFF : 0xFFA7FFE1);
+                    paint.setColor(MaterialColors.getColor(this, HALO.equals(effect) ? com.google.android.material.R.attr.colorSecondary : com.google.android.material.R.attr.colorPrimary, 0));
                     paint.setAlpha((int) (Math.max(0, 1 - phase) * 190));
                     paint.setStrokeWidth((HALO.equals(effect) ? 12 : 2.5f) * unit);
                     canvas.drawCircle(cx, cy, (32 + phase * 60) * unit, paint);
                 }
             }
         }
-        paint.setAlpha(255); paint.setColor(0xFFA7FFE1); paint.setStrokeWidth(2.6f * unit);
+        paint.setAlpha(255); paint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary, 0)); paint.setStrokeWidth(2.6f * unit);
         for (int i = 0; i < 5; i++) {
             float r = (8 + i * 5) * unit;
             ring.set(cx - r, cy - r, cx + r, cy + r);
             canvas.drawArc(ring, 200 + i * 8, 290 - i * 13, false, paint);
         }
-        paint.setColor(0x555FB49D); paint.setStrokeWidth(unit);
+        paint.setColor(ColorUtils.setAlphaComponent(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary, 0), 85)); paint.setStrokeWidth(unit);
         canvas.drawCircle(cx, cy, 35 * unit, paint);
     }
 }

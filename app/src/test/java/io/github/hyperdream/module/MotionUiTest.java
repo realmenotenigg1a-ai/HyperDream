@@ -9,8 +9,8 @@ import static org.junit.Assert.assertSame;
 
 import android.animation.TimeInterpolator;
 import android.widget.RadioButton;
-import android.widget.Switch;
-import android.widget.SeekBar;
+import android.widget.CompoundButton;
+import com.google.android.material.slider.Slider;
 import android.widget.RadioGroup;
 import android.view.View;
 import android.os.Bundle;
@@ -49,15 +49,15 @@ public final class MotionUiTest {
     public void controlsLoadWithSafeDefaultsAndRestartButton() {
         assertFalse(SettingsStore.read(activity).enabled);
         assertTrue(((RadioButton) activity.findViewById(R.id.curve_system)).isChecked());
-        assertFalse(((Switch) activity.findViewById(R.id.scale_delays)).isChecked());
+        assertFalse(((CompoundButton) activity.findViewById(R.id.scale_delays)).isChecked());
         assertNotNull(activity.findViewById(R.id.restart_launcher));
     }
 
     @Test
     public void controlsPersistActualSettingsAndResetAllOverrides() {
         ((RadioButton) activity.findViewById(R.id.curve_emphasized)).performClick();
-        ((Switch) activity.findViewById(R.id.scale_delays)).performClick();
-        ((Switch) activity.findViewById(R.id.enable_duration)).performClick();
+        ((CompoundButton) activity.findViewById(R.id.scale_delays)).performClick();
+        ((CompoundButton) activity.findViewById(R.id.enable_duration)).performClick();
         AnimationSettings settings = SettingsStore.read(activity);
         assertTrue(settings.enabled);
         assertTrue(settings.scaleDelays);
@@ -90,9 +90,9 @@ public final class MotionUiTest {
 
     @Test
     public void springSlidersPersistAndResetIndependently() {
-        ((SeekBar) activity.findViewById(R.id.spring_response)).setProgress(5);
-        ((SeekBar) activity.findViewById(R.id.spring_damping)).setProgress(3);
-        ((Switch) activity.findViewById(R.id.enable_spring)).performClick();
+        ((Slider) activity.findViewById(R.id.spring_response)).setValue(5);
+        ((Slider) activity.findViewById(R.id.spring_damping)).setValue(3);
+        ((CompoundButton) activity.findViewById(R.id.enable_spring)).performClick();
         SpringSettings settings = SettingsStore.readSpring(activity);
         assertTrue(settings.enabled);
         assertEquals(0.75f, settings.responseMultiplier, 0.001f);
@@ -107,8 +107,8 @@ public final class MotionUiTest {
     public void tabsExposeRealPagesAndBuildIdentity() {
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_spring).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_setup).getVisibility());
-        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
-                .selectTab(LiquidGlassNavigationView.DEVICE, false);
+        ((StudioNavigationView) activity.findViewById(R.id.studio_navigation))
+                .selectTab(StudioNavigationView.DEVICE, false);
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_spring).getVisibility());
         String identity = ((android.widget.TextView) activity.findViewById(R.id.build_identity)).getText().toString();
@@ -172,12 +172,15 @@ public final class MotionUiTest {
     }
 
     @Test
-    public void screenUsesPlainBlackBackgroundWithoutDecorativeBackdrop() {
+    public void screenUsesMaterialSurfaceRatherThanGlassBackground() {
         android.graphics.drawable.Drawable background = activity.findViewById(R.id.screen_root).getBackground();
         assertTrue(background instanceof android.graphics.drawable.ColorDrawable);
-        assertEquals(android.graphics.Color.BLACK,
+        assertEquals(com.google.android.material.color.MaterialColors.getColor(
+                activity.findViewById(R.id.screen_root), com.google.android.material.R.attr.colorSurface, 0),
                 ((android.graphics.drawable.ColorDrawable) background).getColor());
+        assertTrue(activity.findViewById(R.id.page_motion) instanceof com.google.android.material.card.MaterialCardView);
     }
+
 
     @Test
     public void springReportShortcutCopiesBuildAndLatestHookEvidence() {
@@ -197,79 +200,66 @@ public final class MotionUiTest {
     }
 
     @Test
-    public void glassNavigationIsASiblingOverlayWithScrollClearance() {
+    public void materialNavigationIsASiblingWithScrollClearance() {
         View root = activity.findViewById(R.id.screen_root);
         View scroll = activity.findViewById(R.id.studio_scroll);
-        View navigation = activity.findViewById(R.id.glass_navigation);
+        View navigation = activity.findViewById(R.id.studio_navigation);
         assertSame(root, navigation.getParent());
         assertSame(root, scroll.getParent());
         assertTrue(scroll.getPaddingBottom() >= 106 * activity.getResources().getDisplayMetrics().density);
     }
 
     @Test
-    public void draggingGlassFarOutsideBarKeepsLensInsideAndSelectsDestination() {
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
-        navigation.layout(0, 0, 360, 90);
-        long time = android.os.SystemClock.uptimeMillis();
-        android.view.MotionEvent down = android.view.MotionEvent.obtain(time, time,
-                android.view.MotionEvent.ACTION_DOWN, navigation.lensCenterX(), navigation.lensCenterY(), 0);
-        navigation.onTouchEvent(down); down.recycle();
-        for (float[] position : new float[][]{{-10000, -10000}, {10000, 10000}, {10000, 45}}) {
-            android.view.MotionEvent move = android.view.MotionEvent.obtain(time, time + 20,
-                    android.view.MotionEvent.ACTION_MOVE, position[0], position[1], 0);
-            navigation.onTouchEvent(move); move.recycle();
-            assertTrue(navigation.isLensContained());
-        }
-        android.view.MotionEvent up = android.view.MotionEvent.obtain(time, time + 40,
-                android.view.MotionEvent.ACTION_UP, 10000, 45, 0);
-        navigation.onTouchEvent(up); up.recycle();
-        assertEquals(LiquidGlassNavigationView.DEVICE, navigation.getSelectedTab());
-        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
-        navigation.pauseGlass();
-        assertTrue(navigation.isLensContained());
+    public void materialNavigationClampsInvalidSavedDestinationAndUsesRealMenu() {
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
+        navigation.selectTab(999, false);
+        assertEquals(StudioNavigationView.DEVICE, navigation.getSelectedTab());
+        assertEquals(R.id.nav_device, navigation.getSelectedItemId());
+        navigation.selectTab(-5, false);
+        assertEquals(StudioNavigationView.HOME, navigation.getSelectedTab());
     }
 
+
     @Test
-    public void virtualNavigationButtonsAreLabeledAndActionable() {
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
-        android.view.accessibility.AccessibilityNodeProvider provider = navigation.getAccessibilityNodeProvider();
-        android.view.accessibility.AccessibilityNodeInfo device = provider.createAccessibilityNodeInfo(LiquidGlassNavigationView.DEVICE);
-        assertEquals(activity.getString(R.string.tab_device), device.getText().toString());
-        assertTrue(device.isClickable());
-        assertTrue(provider.performAction(LiquidGlassNavigationView.DEVICE, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
-        assertEquals(LiquidGlassNavigationView.DEVICE, navigation.getSelectedTab());
-        assertFalse(provider.performAction(99, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
+    public void materialNavigationDestinationsAreLabeledAndActionable() {
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
+        assertEquals(4, navigation.getMenu().size());
+        assertEquals(activity.getString(R.string.tab_device), navigation.getMenu().findItem(R.id.nav_device).getTitle().toString());
+        navigation.setSelectedItemId(R.id.nav_device);
+        assertEquals(StudioNavigationView.DEVICE, navigation.getSelectedTab());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
     }
+
 
     @Test
     @Config(sdk = 32)
-    public void android12UsesSafeBitmapFallbackAndCanNavigate() {
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
-        navigation.layout(0, 0, 360, 90);
-        navigation.draw(new android.graphics.Canvas(android.graphics.Bitmap.createBitmap(360, 90,
-                android.graphics.Bitmap.Config.ARGB_8888)));
-        navigation.selectTab(LiquidGlassNavigationView.ANIMATOR, false);
-        assertTrue(navigation.isLensContained());
+    public void android12InflatesMaterialYouAndCanNavigate() {
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
+        navigation.selectTab(StudioNavigationView.ANIMATOR, false);
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_motion).getVisibility());
+        assertTrue(activity.findViewById(R.id.enable_duration) instanceof com.google.android.material.materialswitch.MaterialSwitch);
     }
 
+
     @Test
-    public void floatingDestinationSurvivesActivityRecreation() {
-        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
-                .selectTab(LiquidGlassNavigationView.DEVICE, false);
+    public void materialDestinationSurvivesActivityRecreation() {
+        ((StudioNavigationView) activity.findViewById(R.id.studio_navigation))
+                .selectTab(StudioNavigationView.DEVICE, false);
         controller.recreate();
         activity = controller.get();
-        assertEquals(LiquidGlassNavigationView.DEVICE,
-                ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation)).getSelectedTab());
+        assertEquals(StudioNavigationView.DEVICE,
+                ((StudioNavigationView) activity.findViewById(R.id.studio_navigation)).getSelectedTab());
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_motion).getVisibility());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void capturingAnAncestorIsRejectedToPreventRecursiveScreenshots() {
-        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
-                .setBackdropSource(activity.findViewById(R.id.screen_root));
+    @Test
+    public void controlsUseActualMaterialComponents() {
+        assertTrue(activity.findViewById(R.id.play_preview) instanceof com.google.android.material.button.MaterialButton);
+        assertTrue(activity.findViewById(R.id.spring_response) instanceof Slider);
+        assertTrue(activity.findViewById(R.id.duration_fast) instanceof com.google.android.material.radiobutton.MaterialRadioButton);
     }
+
 
     @Test
     public void startupCheckpointIsCopyableButNotAnAppliedHookClaim() {
@@ -339,8 +329,8 @@ public final class MotionUiTest {
         android.view.ViewParent parent = activity.findViewById(R.id.restart_launcher).getParent();
         while (parent != null && parent != setup) { parent = parent.getParent(); }
         assertSame(setup, parent);
-        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
-                .selectTab(LiquidGlassNavigationView.ANIMATOR, false);
+        ((StudioNavigationView) activity.findViewById(R.id.studio_navigation))
+                .selectTab(StudioNavigationView.ANIMATOR, false);
         assertEquals(activity.getString(R.string.animator_hero),
                 ((android.widget.TextView) activity.findViewById(R.id.studio_heading)).getText().toString());
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_motion).getVisibility());
@@ -355,7 +345,7 @@ public final class MotionUiTest {
         for (int id : new int[]{R.id.play_preview, R.id.enable_duration, R.id.duration_fast, R.id.spring_damping}) {
             assertNotNull(activity.findViewById(id).getStateListAnimator());
         }
-        ((Switch) activity.findViewById(R.id.enable_duration)).performClick();
+        ((CompoundButton) activity.findViewById(R.id.enable_duration)).performClick();
         assertTrue(SettingsStore.read(activity).enabled);
         ((RadioButton) activity.findViewById(R.id.duration_fast)).performClick();
         assertEquals(0.5f, SettingsStore.read(activity).durationScale, 0f);
@@ -384,50 +374,47 @@ public final class MotionUiTest {
         activity.findViewById(R.id.toggle_diagnostics).performClick();
         layoutStudio();
         android.widget.ScrollView scroll = activity.findViewById(R.id.studio_scroll);
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
         scroll.scrollTo(0, 180);
         int homeOffset = scroll.getScrollY();
         assertTrue(homeOffset > 0);
-        navigation.selectTab(LiquidGlassNavigationView.DEVICE, false);
+        navigation.selectTab(StudioNavigationView.DEVICE, false);
         layoutStudio();
         assertEquals(0, scroll.getScrollY());
         scroll.scrollTo(0, 60);
         int deviceOffset = scroll.getScrollY();
         assertTrue(deviceOffset > 0);
-        navigation.selectTab(LiquidGlassNavigationView.HOME, false);
+        navigation.selectTab(StudioNavigationView.HOME, false);
         layoutStudio();
         assertEquals(homeOffset, scroll.getScrollY());
-        navigation.selectTab(LiquidGlassNavigationView.DEVICE, false);
+        navigation.selectTab(StudioNavigationView.DEVICE, false);
         layoutStudio();
         assertEquals(deviceOffset, scroll.getScrollY());
     }
 
     @Test
-    public void versionOneAndCompactFourDestinationNavigation() {
-        assertEquals("1.0", BuildConfig.VERSION_NAME);
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
-        assertEquals(72 * activity.getResources().getDisplayMetrics().density,
-                navigation.getLayoutParams().height, 0.1f);
-        assertEquals(4, navigation.getAccessibilityNodeProvider()
-                .createAccessibilityNodeInfo(View.NO_ID).getChildCount());
-        navigation.selectTab(LiquidGlassNavigationView.FINGERPRINTS, false);
+    public void materialFourDestinationNavigationIncludesFingerprintPage() {
+        assertEquals("1.1", BuildConfig.VERSION_NAME);
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
+        assertTrue(navigation instanceof com.google.android.material.bottomnavigation.BottomNavigationView);
+        assertEquals(4, navigation.getMenu().size());
+        navigation.selectTab(StudioNavigationView.FINGERPRINTS, false);
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_fingerprints).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_motion).getVisibility());
-        assertEquals(activity.getString(R.string.fingerprint_hero),
-                ((android.widget.TextView) activity.findViewById(R.id.studio_heading)).getText().toString());
     }
+
 
     @Test
     public void fingerprintStyleIsLocalPersistentAndStopsWhenLeavingPage() {
-        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
-        navigation.selectTab(LiquidGlassNavigationView.FINGERPRINTS, false);
+        StudioNavigationView navigation = activity.findViewById(R.id.studio_navigation);
+        navigation.selectTab(StudioNavigationView.FINGERPRINTS, false);
         ((RadioButton) activity.findViewById(R.id.fingerprint_spark)).performClick();
         FingerprintPreviewView fingerprint = activity.findViewById(R.id.fingerprint_preview);
         assertEquals(FingerprintPreviewView.SPARK, fingerprint.getEffect());
         assertFalse(SettingsStore.read(activity).enabled);
         assertFalse(SettingsStore.readSpring(activity).enabled);
         fingerprint.performClick();
-        navigation.selectTab(LiquidGlassNavigationView.HOME, false);
+        navigation.selectTab(StudioNavigationView.HOME, false);
         assertFalse(fingerprint.isPlaying());
         controller.recreate(); activity = controller.get();
         assertEquals(FingerprintPreviewView.SPARK,
@@ -437,7 +424,7 @@ public final class MotionUiTest {
     @Test
     public void animationWarningsAreDirectChildrenNotHiddenInDisclosure() {
         for (int id : new int[]{R.id.page_spring, R.id.page_motion}) {
-            android.view.ViewGroup page = activity.findViewById(id);
+            android.view.ViewGroup page = (android.view.ViewGroup) ((android.view.ViewGroup) activity.findViewById(id)).getChildAt(0);
             android.widget.TextView warning = (android.widget.TextView) page.getChildAt(0);
             assertEquals(activity.getString(R.string.animations_not_working), warning.getText().toString());
             assertEquals(View.VISIBLE, warning.getVisibility());
@@ -455,5 +442,30 @@ public final class MotionUiTest {
         }
         assertEquals(FingerprintPreviewView.RIPPLE, fingerprint.getEffect());
         fingerprint.stop(); assertFalse(fingerprint.isPlaying());
+    }
+
+    @Test
+    public void systemUiRestartRequiresConfirmationAndCancelDoesNotRunRoot() {
+        ((StudioNavigationView) activity.findViewById(R.id.studio_navigation)).selectTab(StudioNavigationView.DEVICE, false);
+        android.widget.TextView status = activity.findViewById(R.id.systemui_restart_status);
+        String before = status.getText().toString();
+        activity.findViewById(R.id.restart_systemui).performClick();
+        android.app.Dialog shown = org.robolectric.shadows.ShadowDialog.getLatestDialog();
+        assertTrue(shown instanceof androidx.appcompat.app.AlertDialog);
+        androidx.appcompat.app.AlertDialog confirmation = (androidx.appcompat.app.AlertDialog) shown;
+        assertTrue(confirmation.isShowing());
+        assertEquals(before, status.getText().toString());
+        assertFalse(RestartGuard.RUNNING.get());
+        confirmation.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick();
+        assertEquals(before, status.getText().toString());
+        assertFalse(RestartGuard.RUNNING.get());
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    public void materialNightThemeInflatesAndRetainsUnfinishedFeatureWarnings() {
+        assertTrue(activity.findViewById(R.id.page_spring) instanceof com.google.android.material.card.MaterialCardView);
+        assertNotNull(activity.findViewById(R.id.restart_systemui));
+        assertEquals(View.GONE, activity.findViewById(R.id.diagnostic_details).getVisibility());
     }
 }

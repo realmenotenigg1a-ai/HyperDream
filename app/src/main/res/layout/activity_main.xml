@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/screen_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_background">
+    android:background="?attr/colorSurface">
 
     <ScrollView
         android:id="@+id/studio_scroll"
@@ -45,7 +45,7 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
-                        style="@style/GlassTitle"
+                        style="@style/StudioTitle"
                         android:text="@string/app_name"
                         android:textSize="28sp" />
                     <TextView
@@ -55,7 +55,7 @@
                         android:layout_marginTop="4dp"
                         android:letterSpacing="0.12"
                         android:text="@string/brand_edition"
-                        android:textColor="@color/mint"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="11sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -65,11 +65,11 @@
                 android:layout_height="wrap_content"
                 android:accessibilityHeading="true"
                 android:id="@+id/studio_heading"
-                android:fontFamily="sans-serif-light"
+                android:fontFamily="sans-serif"
                 android:text="@string/glass_hero"
-                android:textColor="@color/text_primary"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="30sp" />
-            <TextView android:id="@+id/studio_caption" style="@style/GlassBody" android:text="@string/glass_subtitle" />
+            <TextView android:id="@+id/studio_caption" style="@style/StudioBody" android:text="@string/glass_subtitle" />
 
             <include android:id="@+id/page_spring" layout="@layout/card_spring" />
             <include android:id="@+id/page_motion" layout="@layout/card_motion" />
@@ -78,7 +78,7 @@
             <include android:id="@+id/page_features" layout="@layout/card_features" />
 
             <TextView
-                style="@style/GlassBody"
+                style="@style/StudioBody"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:text="@string/glass_disclaimer"
@@ -86,13 +86,14 @@
         </LinearLayout>
     </ScrollView>
 
-    <io.github.hyperdream.module.LiquidGlassNavigationView
-        android:id="@+id/glass_navigation"
+    <io.github.hyperdream.module.StudioNavigationView
+        android:id="@+id/studio_navigation"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="80dp"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginStart="28dp"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="12dp"
+        android:background="?attr/colorSurfaceContainer"
+        app:menu="@menu/studio_navigation"
+        app:labelVisibilityMode="labeled"
+        app:itemHorizontalTranslationEnabled="false"
         android:contentDescription="@string/navigation_description" />
 </FrameLayout>

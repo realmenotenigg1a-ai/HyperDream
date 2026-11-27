@@ -46,7 +46,7 @@
     <string name="feature_motion_body">A guarded Java spring-provider adapter is now in the Spring tab. Native transition support, custom curve editing, genie effects, and per-app profiles remain unimplemented.</string>
     <string name="feature_sharing_title">Layouts and sharing · Research needed</string>
     <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
-    <string name="glass_disclaimer">Floating navigation uses a frosted app-content capture with simulated highlights. It does not use Apple’s renderer.
+    <string name="glass_disclaimer">Material You · wallpaper colors when available, with light and dark themes.
 Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="curve_heading">Choose how it moves</string>
     <string name="curve_system">Original — preserve launcher easing</string>
@@ -76,7 +76,7 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="copy_diagnostics">Copy build details</string>
     <string name="build_identity">v%1$s · build %2$s</string>
     <string name="nav_home">Home</string>
-    <string name="navigation_description">Floating navigation: Home, Animator, Fingerprints, Device. Drag the selection lens within the bar or tap a destination.</string>
+    <string name="navigation_description">Navigation: Home, Animator, Fingerprints, Device.</string>
     <string name="tab_motion">Animator</string>
     <string name="tab_device">Device</string>
     <string name="spring_title">Spring studio</string>
@@ -137,9 +137,22 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="fingerprint_preview_accessibility">Local fingerprint effect preview. Double tap to replay. This is not the fingerprint sensor.</string>
     <string name="fingerprint_replay">Replay touch effect</string>
     <string name="fingerprint_choose">Choose a preview style</string>
-    <string name="fingerprint_ripple">Ripple · expanding mint rings</string>
-    <string name="fingerprint_halo">Halo · a soft cyan ring</string>
-    <string name="fingerprint_spark">Spark · a violet burst</string>
+    <string name="fingerprint_ripple">Ripple · expanding rings</string>
+    <string name="fingerprint_halo">Halo · a soft ring</string>
+    <string name="fingerprint_spark">Spark · a radial burst</string>
     <string name="fingerprint_safety">Your choice is saved for this preview only. HyperDream does not read fingerprints, observe authentication, change unlock security, or control sensor illumination. No biometric permission is requested.</string>
     <string name="fingerprint_still">System animations are off. Showing a still fingerprint-style effect.</string>
+    <string name="systemui_heading">System UI</string>
+    <string name="restart_systemui">Restart System UI</string>
+    <string name="systemui_explanation">Restart the status bar, notification shade, Quick Settings and navigation UI. This is separate from restarting the launcher and does not fix unfinished hooks or enable fingerprint integration.</string>
+    <string name="systemui_idle">Optional · requires root, owner profile and confirmation. System UI will briefly disappear.</string>
+    <string name="systemui_confirmation">System UI will briefly disappear, including the status bar, Quick Settings and navigation controls. This requests root to terminate only the exact com.android.systemui process; Android is expected to restart it. No app data is cleared and no full reboot is requested. Save your work first. Automatic recovery is not guaranteed on every ROM; use your device hardware reboot procedure if it does not return. Continue?</string>
+    <string name="systemui_confirm">Restart with root</string>
+    <string name="systemui_running">Waiting for root / requesting restart (up to 30 seconds)…</string>
+    <string name="systemui_requested">Restart signal sent. Android should bring System UI back; command completion does not confirm recovery.</string>
+    <string name="systemui_no_root">Root command or temporary output unavailable. Check your root manager; no successful restart confirmed.</string>
+    <string name="systemui_timeout">Root command timed out. Restart is not confirmed; check whether System UI has returned before trying again.</string>
+    <string name="systemui_unavailable">System UI package is unavailable in this profile. No restart requested.</string>
+    <string name="systemui_profile">Restart refused outside the owner profile. No restart requested.</string>
+    <string name="systemui_failed">Restart was denied or a process/user safety check failed. No successful restart confirmed.</string>
 </resources>

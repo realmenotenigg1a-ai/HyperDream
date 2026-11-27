@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Explicit, root-approved restart only. Call on a worker thread, never on app startup. */
 final class LauncherRestarter {
@@ -20,12 +19,11 @@ final class LauncherRestarter {
         LAUNCHER_UNAVAILABLE, NOT_DEFAULT_HOME, PROFILE_UNSUPPORTED, BUSY, SAVE_FAILED
     }
 
-    private static final AtomicBoolean RUNNING = new AtomicBoolean();
 
     private LauncherRestarter() {}
 
     static Result restart(Context context) {
-        if (!RUNNING.compareAndSet(false, true)) {
+        if (!RestartGuard.RUNNING.compareAndSet(false, true)) {
             return Result.BUSY;
         }
         java.lang.Process process = null;
@@ -77,7 +75,7 @@ final class LauncherRestarter {
                 // Contains only command output, never uploaded or shown as a public log.
                 outputFile.delete();
             }
-            RUNNING.set(false);
+            RestartGuard.RUNNING.set(false);
         }
     }
 }
