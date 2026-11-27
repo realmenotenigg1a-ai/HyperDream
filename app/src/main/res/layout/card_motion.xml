@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" style="@style/StudioCard">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+    <TextView style="@style/StudioBody" android:background="@drawable/warning_panel" android:padding="14dp" android:text="@string/animations_not_working" android:textColor="?attr/colorOnErrorContainer" android:textStyle="bold" android:accessibilityHeading="true" />
+    <TextView style="@style/StudioTitle" android:text="@string/motion_title" />
+    <TextView style="@style/StudioBody" android:text="@string/motion_summary" />
+    <io.github.hyperdream.module.MotionPreviewView
+        android:id="@+id/motion_preview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/preview_accessibility"
+        android:importantForAccessibility="yes" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/play_preview"
+        style="@style/StudioButton"
+        android:text="@string/play_preview" />
+    <TextView style="@style/StudioBody" android:text="@string/preview_notice" android:textSize="13sp" />
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/enable_duration"
+        android:paddingHorizontal="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:minHeight="56dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/enable_duration"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="16sp" style="@style/StudioSwitch" />
+    <TextView android:id="@+id/motion_saved" style="@style/StudioBody" android:text="@string/autosave_hint" android:textColor="?attr/colorPrimary" android:textSize="12sp" android:accessibilityLiveRegion="polite" />
+    <TextView style="@style/StudioBody" android:labelFor="@id/duration_presets" android:text="@string/duration_heading" />
+    <RadioGroup
+        android:id="@+id/duration_presets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/duration_fast" style="@style/DurationOption" android:text="@string/duration_fast" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/duration_quick" style="@style/DurationOption" android:text="@string/duration_quick" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/duration_default" style="@style/DurationOption" android:text="@string/duration_default" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/duration_relaxed" style="@style/DurationOption" android:text="@string/duration_relaxed" />
+    </RadioGroup>
+    <TextView style="@style/StudioBody" android:labelFor="@id/curve_presets" android:text="@string/curve_heading" />
+    <RadioGroup
+        android:id="@+id/curve_presets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/curve_system" style="@style/DurationOption" android:text="@string/curve_system" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/curve_smooth" style="@style/DurationOption" android:text="@string/curve_smooth" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/curve_emphasized" style="@style/DurationOption" android:text="@string/curve_emphasized" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/curve_linear" style="@style/DurationOption" android:text="@string/curve_linear" />
+    </RadioGroup>
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/scale_delays"
+        android:text="@string/scale_delays" style="@style/StudioSwitch" />
+    <TextView style="@style/StudioBody" android:text="@string/curve_notice" android:textSize="13sp" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/reset_settings" style="@style/StudioButton" android:text="@string/reset_settings" />
+    <TextView style="@style/StudioBody" android:text="@string/restart_notice" android:textColor="?attr/colorError" android:textSize="13sp" />
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

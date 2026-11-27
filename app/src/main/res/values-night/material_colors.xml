@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="md_primary">#D0BCFF</color><color name="md_on_primary">#381E72</color>
+    <color name="md_primary_container">#4F378B</color><color name="md_on_primary_container">#EADDFF</color>
+    <color name="md_background">#141218</color><color name="md_surface_container">#211F26</color>
+    <color name="md_on_surface">#E6E0E9</color><color name="md_on_surface_variant">#CAC4D0</color>
+    <bool name="light_system_bars">false</bool>
+</resources>

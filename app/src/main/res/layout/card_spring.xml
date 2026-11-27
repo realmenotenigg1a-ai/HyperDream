@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" style="@style/StudioCard">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+    <TextView style="@style/StudioBody" android:background="@drawable/warning_panel" android:padding="14dp" android:text="@string/animations_not_working" android:textColor="?attr/colorOnErrorContainer" android:textStyle="bold" android:accessibilityHeading="true" />
+    <TextView style="@style/StudioTitle" android:text="@string/spring_title" />
+    <TextView style="@style/StudioBody" android:text="@string/spring_explanation" />
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/enable_spring"
+        android:layout_marginTop="16dp"
+        android:text="@string/spring_enable" style="@style/StudioSwitch" />
+    <TextView
+        android:id="@+id/spring_response_label"
+        style="@style/StudioBody"
+        android:labelFor="@id/spring_response" />
+    <com.google.android.material.slider.Slider
+        android:id="@+id/spring_response"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:valueFrom="0" android:valueTo="20" android:stepSize="1" android:value="10"
+        android:contentDescription="@string/spring_response_accessibility" />
+    <TextView
+        android:id="@+id/spring_damping_label"
+        style="@style/StudioBody"
+        android:labelFor="@id/spring_damping" />
+    <com.google.android.material.slider.Slider
+        android:id="@+id/spring_damping"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:valueFrom="0" android:valueTo="14" android:stepSize="1" android:value="10"
+        android:contentDescription="@string/spring_damping_accessibility" />
+    <TextView android:id="@+id/spring_saved" style="@style/StudioBody" android:text="@string/autosave_hint" android:textColor="?attr/colorPrimary" android:textSize="12sp" android:accessibilityLiveRegion="polite" />
+    <TextView style="@style/StudioBody" android:text="@string/spring_values_notice" android:textSize="13sp" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/reset_spring" style="@style/StudioButton" android:text="@string/spring_reset" />
+    <TextView style="@style/StudioBody" android:text="@string/experimental_short" android:textColor="?attr/colorError" android:textSize="13sp" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/toggle_diagnostics" style="@style/StudioButton" android:text="@string/show_diagnostics" />
+    <LinearLayout
+        android:id="@+id/diagnostic_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+    <TextView style="@style/StudioBody" android:text="@string/spring_compatibility" android:textColor="?attr/colorError" />
+    <TextView style="@style/StudioBody" android:text="@string/diagnostic_protocol" android:textSize="13sp" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/refresh_hooks" style="@style/StudioButton" android:text="@string/refresh_hooks" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/copy_hook_diagnostics" style="@style/StudioButton" android:text="@string/copy_hook_diagnostics" />
+    <TextView
+        android:id="@+id/hook_report"
+        style="@style/StudioBody"
+        android:accessibilityLiveRegion="polite"
+        android:text="@string/report_none" />
+    </LinearLayout>
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

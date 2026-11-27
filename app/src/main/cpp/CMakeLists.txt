@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(hyperdream_runtime LANGUAGES CXX)
+add_library(hyperdream_runtime SHARED runtime_probe.cpp)
+target_compile_features(hyperdream_runtime PRIVATE cxx_std_17)
+target_compile_options(hyperdream_runtime PRIVATE -Wall -Wextra -Werror -fvisibility=hidden)
+target_compile_definitions(hyperdream_runtime PRIVATE HD_BUILD="${HD_BUILD}")
+target_link_libraries(hyperdream_runtime PRIVATE log dl)
+target_link_options(hyperdream_runtime PRIVATE "-Wl,-z,max-page-size=16384")

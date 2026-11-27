@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" style="@style/StudioCard">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+    <TextView style="@style/StudioTitle" android:text="@string/fingerprint_title" />
+    <TextView style="@style/StudioBody" android:text="@string/fingerprint_scope" android:textColor="?attr/colorError" />
+    <io.github.hyperdream.module.FingerprintPreviewView
+        android:id="@+id/fingerprint_preview"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/fingerprint_preview_accessibility" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/replay_fingerprint" style="@style/StudioButton" android:text="@string/fingerprint_replay" />
+    <TextView style="@style/StudioBody" android:text="@string/fingerprint_choose" android:labelFor="@id/fingerprint_effects" />
+    <RadioGroup android:id="@+id/fingerprint_effects" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/fingerprint_ripple" style="@style/DurationOption" android:text="@string/fingerprint_ripple" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/fingerprint_halo" style="@style/DurationOption" android:text="@string/fingerprint_halo" />
+        <com.google.android.material.radiobutton.MaterialRadioButton android:id="@+id/fingerprint_spark" style="@style/DurationOption" android:text="@string/fingerprint_spark" />
+    </RadioGroup>
+    <TextView style="@style/StudioBody" android:text="@string/fingerprint_safety" android:textSize="13sp" />
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

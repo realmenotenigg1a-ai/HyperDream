@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" style="@style/StudioCard">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/status_pill"
+                    android:text="@string/experimental_badge"
+                    android:textColor="?attr/colorOnSecondaryContainer"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/configuration_status"
+                    style="@style/StudioBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/config_off"
+                    android:textColor="?attr/colorOnSurface" />
+                <TextView style="@style/StudioBody" android:text="@string/activation_notice" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/restart_launcher" style="@style/StudioButton" android:text="@string/restart_launcher" />
+                <TextView
+                    android:id="@+id/restart_status"
+                    style="@style/StudioBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/restart_explanation" />
+
+            </LinearLayout>
+
+    <TextView style="@style/StudioTitle" android:text="@string/systemui_heading" />
+    <TextView style="@style/StudioBody" android:text="@string/systemui_explanation" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/restart_systemui" style="@style/StudioButton" android:text="@string/restart_systemui" />
+    <TextView android:id="@+id/systemui_restart_status" style="@style/StudioBody" android:text="@string/systemui_idle" android:accessibilityLiveRegion="polite" />
+    <TextView style="@style/StudioTitle" android:layout_marginTop="24dp" android:text="@string/setup_heading" />
+    <TextView style="@style/StudioBody" android:text="@string/setup_details" />
+    <TextView style="@style/StudioBody" android:text="@string/status_details" />
+    <TextView style="@style/StudioTitle" android:layout_marginTop="24dp" android:text="@string/device_heading" />
+    <TextView
+        android:id="@+id/device_details"
+        style="@style/StudioBody"
+        android:textIsSelectable="true" />
+    <TextView style="@style/StudioTitle" android:layout_marginTop="24dp" android:text="@string/runtime_heading" />
+    <TextView
+        android:id="@+id/runtime_details"
+        style="@style/StudioBody"
+        android:accessibilityLiveRegion="polite"
+        android:textIsSelectable="true"
+        android:text="@string/runtime_pending" />
+    <TextView style="@style/StudioTitle" android:layout_marginTop="24dp" android:text="@string/native_probe_heading" />
+    <TextView style="@style/StudioBody" android:text="@string/native_probe_details" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/hook_report_button" style="@style/StudioButton" android:text="@string/hook_report_title" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/copy_diagnostics" style="@style/StudioButton" android:text="@string/copy_diagnostics" />
+    <TextView style="@style/StudioBody" android:layout_marginTop="20dp" android:text="@string/safety_notice" android:textColor="?attr/colorError" />
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

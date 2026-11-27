@@ -1,0 +1,65 @@
+name: Android
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      # ubuntu-latest already provides Android SDK command-line tools.
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDK_MANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$SDK_MANAGER" ]]; then
+            echo "::error title=Android SDK unavailable::Expected sdkmanager at $SDK_MANAGER on the ubuntu-latest runner."
+            exit 1
+          fi
+          if ! "$SDK_MANAGER" "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1" > sdk-setup.log 2>&1; then
+            cat sdk-setup.log
+            MESSAGE=$(tail -n 15 sdk-setup.log | tr '\n' ' ')
+            echo "::error title=Android SDK setup failed::${MESSAGE//'%'/'%25'}"
+            exit 1
+          fi
+      - name: Test native guard and bounded ELF note parser
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Iapp/src/main/cpp app/src/test/cpp/probe_policy_test.cpp -o /tmp/hd-probe-test
+          /tmp/hd-probe-test
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test, lint, and assemble debug APK
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug 2>&1 | tee android-build.log
+      - name: Verify signing and package uniquely identified APK
+        run: bash .github/scripts/package_debug.sh
+      - name: Surface test and lint failures
+        if: failure()
+        run: python3 .github/scripts/report_failures.py
+      - name: Upload verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-verification-reports
+          path: |
+            app/build/test-results/
+            app/build/reports/
+            android-build.log
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HyperDream-debug-${{ github.sha }}
+          path: build/distribution/
+          if-no-files-found: error
