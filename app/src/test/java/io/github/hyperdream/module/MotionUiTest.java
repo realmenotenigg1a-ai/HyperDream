@@ -65,6 +65,7 @@ public final class MotionUiTest {
         assertEquals(activity.getString(R.string.report_without_root),
                 dialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL).getText().toString());
         dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick();
+        org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle();
         assertFalse(dialog.isShowing());
     }
 

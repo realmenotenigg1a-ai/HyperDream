@@ -28,13 +28,14 @@ Observing a library load is a real native observer hook, **not an animation hook
 
 ## Reading the report
 
-Every native log line includes the payload's Git revision, PID, a stage and `animation_applied=0`. Compare the build with the APK identity and PID with `CURRENT_LAUNCHER_PIDS`. Logs are bounded historical evidence, not an authenticated liveness or success attestation. Collection is limited to the `HyperDreamNative` tag (160 lines, 32 KiB), module status, and launcher PIDs. It does **not** collect full logcat, accounts, serials, screenshots or application content; sharing is explicit and never automatic.
+Every native log line includes the payload's Git revision, PID, a stage and `animation_applied=0`. Compare the build with the APK identity and PID with `CURRENT_LAUNCHER_PIDS`. Logs are bounded historical evidence, not an authenticated liveness or success attestation. Collection is limited to the `HyperDreamNative` tag (160 lines, 32 KiB), bounded module status, launcher PIDs, and current target-library mapping presence flags (not addresses or full map paths). It does **not** collect full logcat, accounts, serials, screenshots or application content; sharing is explicit and never automatic.
 
 - `RUNTIME_REGISTRATION result=0`: API accepted the callback in the spawner; not launcher execution.
 - `LAUNCHER_SPECIALIZED`: exact launcher package/process callback reached.
 - `OBSERVER_INSTALLED`: pass-through loader observer installed, **not animation applied**.
 - `OBSERVER_FAILED` / `OBSERVER_UNAVAILABLE`: observer could not install. Report the result.
 - `IMAGE_SEEN`: target ELF appeared, with bounded GNU build ID if available. No base addresses or full library paths are logged. `unavailable` is not a guessed identity.
+- `mapped_libapp` / `mapped_engine`: current mappings in an exact-name validated launcher process. Presence is independent evidence only, not proof the observer ran.
 - `NOT_INSTALLED`: module directory absent. Installed files / disabled markers are not proof of what is loaded in the current process; changes require reboot.
 - No lines: could be root denial, unsupported API, disabled module, log rotation, tag filtering or failed injection. Do not infer a working hook or definitive failure.
 

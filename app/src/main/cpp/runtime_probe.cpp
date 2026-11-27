@@ -69,11 +69,16 @@ void specialized(const AppArgs* args) {
 const HyosModule module{1, specialized};
 void loaded(void*, const Api* supplied) {
     api = supplied;
-    if (!api || !api->getRuntime) return;
+    if (!api || !api->getRuntime) {
+        REPORT("stage=RUNTIME_UNAVAILABLE animation_applied=0"); return;
+    }
     const Runtime* runtime = api->getRuntime();
-    if (!runtime || runtime->type != 1 || runtime->api_version < 1 || !runtime->registerModule) return;
+    if (!runtime || runtime->type != 1 || runtime->api_version < 1 || !runtime->registerModule) {
+        REPORT("stage=RUNTIME_UNAVAILABLE animation_applied=0"); return;
+    }
     const int result = runtime->registerModule(&module);
-    REPORT("stage=RUNTIME_REGISTRATION result=%d animation_applied=0", result);
+    REPORT("stage=RUNTIME_REGISTRATION result=%d hyos_api=%d zn_api=4 animation_applied=0",
+           result, runtime->api_version);
 }
 }
 extern "C" {

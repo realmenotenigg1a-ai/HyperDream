@@ -164,7 +164,7 @@ Discrete Slider values preserve the previous spring math and settings schema. Ma
 
 The independent native payload lives in `app/src/main/cpp`, compiled arm64-only with NDK 27.2.12479018/CMake 3.22.1. `native-runtime/` is the separate root-module template; CI extracts the ELF from the APK, checks its architecture and `zn_module` export, then packages the installable ZIP. The APK does not install or enable the root module automatically. Exact package/main-process guards precede all inline hooking. No animation function replacement exists yet. See [NATIVE-TESTING.md](NATIVE-TESTING.md) for stages, prerequisites, caveats and recovery.
 
-`NativeHookReport` uses the shared root-operation guard, fixed owner-user command, bounded private output, timeout and finally cleanup. It reads only module metadata, launcher PIDs and the specific native log tag. UI consent is separate from review/share; no automatic upload or restart. Native stages remain separate from historical Java APPLIED statuses. Missing/old native evidence never promotes a state to animation success.
+`NativeHookReport` uses the shared root-operation guard, fixed owner-user command, bounded private output, timeout and finally cleanup. It reads only bounded module metadata, launcher PIDs, target-image mapping flags and the specific native log tag. UI consent is separate from review/share; no automatic upload or restart. Native stages remain separate from historical Java APPLIED statuses. Missing/old native evidence never promotes a state to animation success.
 
 Run native policy tests independently with:
 
