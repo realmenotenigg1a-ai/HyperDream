@@ -57,6 +57,16 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v1.1: Material You and System UI restart
+
+HyperDream now uses **actual Material 3 components**: tonal cards/buttons, Material switches, discrete sliders, radio controls, dialogs, and standard four-destination bottom navigation. Wallpaper-based dynamic colors are applied when supported by the ROM; a light/dark purple Material palette is the fallback. System light/dark appearance is followed. The supplied logo and unfinished-feature warnings remain.
+
+The custom glass/capture renderer and draggable optical lens have been removed in favor of stock-Android-style Material navigation. Preview artwork also uses theme color roles. This change eliminates that custom glass-rendering path rather than claiming another unverified shader fix.
+
+**Device → Restart System UI** is a separate, explicit root action. It shows a disruption/recovery warning before requesting root, only supports the owner profile with the owner user foreground, verifies the exact `com.android.systemui` process names and owner-user UIDs, and sends TERM. Android is expected to restart its persistent System UI process. No force-stop, data clearing, framework restart or device reboot is issued. A 30-second timeout, shared restart gate, bounded private command output, and error statuses are included. Cancelling the dialog runs no command. The shared gate updates active Activities even across recreation so buttons can recover after an operation finishes.
+
+**Command completion is not proof that System UI recovered.** If the ROM does not bring it back, use the device’s hardware reboot procedure. Root behavior and visual appearance still need physical-device testing. This action does not fix launcher hooks, install System UI hooks, or connect fingerprint effects to the lock screen; Fingerprints remains preview-only. LSPosed scope stays launcher-only.
+
 ## v1.0: compact navigation and Fingerprints
 
 Same HyperDream app and supplied logo, now version **1.0**. This version number is not a launcher-compatibility certification.

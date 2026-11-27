@@ -27,7 +27,7 @@
         <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
         <item name="cardElevation">0dp</item>
         <item name="strokeWidth">0dp</item>
-        <item name="shapeAppearanceOverlay">ShapeAppearance.StudioCard</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.StudioCard</item>
     </style>
     <style name="ShapeAppearance.StudioCard" parent="">
         <item name="cornerFamily">rounded</item><item name="cornerSize">24dp</item>

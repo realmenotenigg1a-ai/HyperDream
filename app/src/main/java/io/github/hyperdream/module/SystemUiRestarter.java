@@ -17,7 +17,7 @@ final class SystemUiRestarter {
     private SystemUiRestarter() {}
 
     static Result restart(Context context) {
-        if (!RestartGuard.RUNNING.compareAndSet(false, true)) { return Result.BUSY; }
+        if (!RestartGuard.begin()) { return Result.BUSY; }
         java.lang.Process process = null;
         File output = null;
         try {
@@ -47,7 +47,7 @@ final class SystemUiRestarter {
         } finally {
             if (process != null && process.isAlive()) { process.destroyForcibly(); }
             if (output != null) { output.delete(); }
-            RestartGuard.RUNNING.set(false);
+            RestartGuard.release();
         }
     }
 }

@@ -2,6 +2,12 @@
 
 HyperDream is inspired by the customization depth of Home Up, not a port or a claim of feature parity. Home Up varies across releases and devices; the categories below are our proposed work areas, **not an exhaustive or verified inventory of Samsung features**. No Samsung code or assets are included.
 
+## v1.1 additions
+
+- Material You: actual Material 3 components, conditional wallpaper colors, semantic surfaces/text/preview colors, and system light/dark themes with a fallback palette. Custom glass rendering/navigation is retired.
+- System UI restart: separate confirmation + root-only exact-process TERM request, owner-only checks, 30s timeout, and shared busy gate. No force-stop/data clearing/reboot; successful recovery is not certified. Root is not requested until confirmation.
+- Existing launcher-animation warnings remain; fingerprint previews remain local-only. No System UI module scope or fingerprint/authentication hook is added.
+
 ## v1.0 status
 
 Launcher animation sections are explicitly marked **not working**; the earlier hook rows below describe implemented experimental code, not successful device behavior. A new **Fingerprints** destination provides Ripple / Halo / Spark **in-app previews only**, with locally saved style selection and reduced-motion/lifecycle handling. Actual fingerprint-sensor effects remain unimplemented. No biometric or lock-screen functionality is altered.

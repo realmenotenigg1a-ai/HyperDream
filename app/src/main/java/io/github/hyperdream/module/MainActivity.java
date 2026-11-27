@@ -45,6 +45,9 @@ public final class MainActivity extends AppCompatActivity {
     private LinearLayout cardStack;
     private boolean binding;
     private final Runnable entrance = this::animateEntrance;
+    private final Runnable restartStateChanged = () -> runOnUiThread(() -> {
+        if (!isFinishing() && !isDestroyed()) { setRestartButtonsEnabled(!RestartGuard.RUNNING.get()); }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,7 +185,7 @@ public final class MainActivity extends AppCompatActivity {
         super.onResume();
         refreshHookReport();
         studioMotion.refresh();
-        setRestartButtonsEnabled(!RestartGuard.RUNNING.get());
+        RestartGuard.observe(restartStateChanged);
     }
 
     @Override
@@ -491,6 +494,7 @@ public final class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        RestartGuard.removeObserver(restartStateChanged);
         cancelScrollRestore();
         studioMotion.stop();
         for (int id : new int[]{R.id.spring_saved, R.id.motion_saved, R.id.studio_heading,

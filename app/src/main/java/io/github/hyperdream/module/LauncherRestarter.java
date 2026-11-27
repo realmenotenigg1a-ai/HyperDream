@@ -23,7 +23,7 @@ final class LauncherRestarter {
     private LauncherRestarter() {}
 
     static Result restart(Context context) {
-        if (!RestartGuard.RUNNING.compareAndSet(false, true)) {
+        if (!RestartGuard.begin()) {
             return Result.BUSY;
         }
         java.lang.Process process = null;
@@ -75,7 +75,7 @@ final class LauncherRestarter {
                 // Contains only command output, never uploaded or shown as a public log.
                 outputFile.delete();
             }
-            RestartGuard.RUNNING.set(false);
+            RestartGuard.release();
         }
     }
 }

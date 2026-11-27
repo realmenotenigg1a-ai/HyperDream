@@ -33,4 +33,20 @@ public final class SystemUiRestartPolicyTest {
             assertEquals(LauncherRestarter.Result.BUSY, LauncherRestarter.restart(null));
         } finally { RestartGuard.RUNNING.set(false); }
     }
+
+    @Test public void gateNotifiesActiveUiOnCompletionAndCanUnsubscribe() {
+        java.util.List<Boolean> states = new java.util.ArrayList<>();
+        Runnable observer = () -> states.add(RestartGuard.RUNNING.get());
+        RestartGuard.observe(observer);
+        try {
+            assertTrue(RestartGuard.begin());
+            assertFalse(RestartGuard.begin());
+            RestartGuard.release();
+            assertEquals(java.util.List.of(false, true, false), states);
+        } finally {
+            RestartGuard.removeObserver(observer);
+            RestartGuard.release();
+        }
+        assertEquals(3, states.size());
+    }
 }

@@ -7,7 +7,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/status_pill"
                     android:text="@string/experimental_badge"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:textSize="12sp"
                     android:textStyle="bold" />
                 <TextView
