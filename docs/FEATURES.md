@@ -9,7 +9,8 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 | Java spring adapter | Guarded open/close spring-provider hook with damping/response controls | Structural fixtures and UI tested; real launcher and HyperOS 4 unverified; see [compatibility](SPRING-COMPATIBILITY.md) |
 | Historical spring reports | Authenticated launcher state, build/settings matching, timestamp | Not a live active badge; APPLIED means parameter interception, not visual verification |
 | Build identity | Version/commit in UI; distinct APK name, checksums, package/signature metadata | CI verifies APK signing; debug keys may differ between runs |
-| Tabbed studio | Spring / Animator / Device with reduced-motion-aware page transitions | Android UI navigation tested |
+| Floating navigation | Home (spring controls) / Animator / Device; tappable destinations, bounded draggable circular lens | Geometry, touch, accessibility actions and API 32 fallback tested; physical TalkBack/visual testing pending |
+| App-local glass optics | Actual underlying content capture; AGSL blur/displacement/highlights on API 33+, blurred bitmap/magnifying fallback on API 31/32 | Skia shader compilation/sampling check; not Apple’s renderer or launcher/system-wide glass |
 | Launcher duration control | Opt-in multipliers on `ValueAnimator.setDuration(long)` in `com.miui.home` main process | JVM math/policy tests; actual HyperOS effects need device testing |
 | Easing presets | Original, smooth, emphasized/liquid-glide, and linear via `setInterpolator` | Curve-only configuration at 1× supported; device effects unverified |
 | Optional delay scaling | Applies duration multiplier to explicit `setStartDelay` calls | Off by default |
@@ -17,7 +18,7 @@ HyperDream is inspired by the customization depth of Home Up, not a port or a cl
 | Device/build report | Locally display/copy Android build and launcher version | No automatic upload or claim of HyperOS verification |
 | Duration presets | 0.5×, 0.75×, 1×, 1.5× | Settings persisted privately; restart launcher or reboot to apply |
 | Restore defaults | Saves disabled / 1× / original curve / unscaled delays | Launcher restart or reboot required to remove a running process's existing hook |
-| Settings UI | Plain black background, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; no live blur/refraction |
+| Settings UI | Plain black background, translucent rounded panels, edge highlights, ripple/soft-press buttons | Native Android views; live app-local glass only in floating navigation |
 | In-app motion | Staggered entry and a replayable icon-to-card illustration | Local only; never used as proof the launcher hook works |
 | Reduced-motion behavior | Skips entry motion and shows a still preview when system animator duration scale is zero | Device accessibility verification still needed |
 

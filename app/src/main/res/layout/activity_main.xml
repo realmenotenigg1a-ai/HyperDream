@@ -6,9 +6,11 @@
     android:background="@color/app_background">
 
     <ScrollView
+        android:id="@+id/studio_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
+        android:paddingBottom="124dp"
         android:fillViewport="true">
 
         <LinearLayout
@@ -82,27 +84,15 @@
                     android:text="@string/config_off"
                     android:textColor="@color/text_primary" />
                 <TextView style="@style/GlassBody" android:text="@string/activation_notice" />
-    <Button android:id="@+id/restart_launcher" style="@style/GlassButton" android:text="@string/restart_launcher" />
-    <TextView
-        android:id="@+id/restart_status"
-        style="@style/GlassBody"
-        android:accessibilityLiveRegion="polite"
-        android:text="@string/restart_explanation" />
+                <Button android:id="@+id/restart_launcher" style="@style/GlassButton" android:text="@string/restart_launcher" />
+                <TextView
+                    android:id="@+id/restart_status"
+                    style="@style/GlassBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/restart_explanation" />
 
             </LinearLayout>
 
-            <RadioGroup
-                android:id="@+id/studio_tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/glass_panel"
-                android:padding="4dp"
-                android:orientation="horizontal">
-                <RadioButton android:id="@+id/tab_spring" style="@style/StudioTab" android:text="@string/tab_spring" />
-                <RadioButton android:id="@+id/tab_motion" style="@style/StudioTab" android:text="@string/tab_motion" />
-                <RadioButton android:id="@+id/tab_device" style="@style/StudioTab" android:text="@string/tab_device" />
-            </RadioGroup>
             <include android:id="@+id/page_spring" layout="@layout/card_spring" />
             <include android:id="@+id/page_motion" layout="@layout/card_motion" />
             <include android:id="@+id/page_setup" layout="@layout/card_setup" />
@@ -116,4 +106,14 @@
                 android:textSize="12sp" />
         </LinearLayout>
     </ScrollView>
+
+    <io.github.hyperdream.module.LiquidGlassNavigationView
+        android:id="@+id/glass_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/navigation_description" />
 </FrameLayout>

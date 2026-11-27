@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 
 import android.animation.TimeInterpolator;
 import android.widget.RadioButton;
@@ -106,7 +107,8 @@ public final class MotionUiTest {
     public void tabsExposeRealPagesAndBuildIdentity() {
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_spring).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_setup).getVisibility());
-        ((RadioGroup) activity.findViewById(R.id.studio_tabs)).check(R.id.tab_device);
+        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
+                .selectTab(LiquidGlassNavigationView.DEVICE, false);
         assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.page_spring).getVisibility());
         String identity = ((android.widget.TextView) activity.findViewById(R.id.build_identity)).getText().toString();
@@ -192,5 +194,62 @@ public final class MotionUiTest {
         assertTrue(copied.contains(BuildConfig.VERSION_NAME));
         assertTrue(copied.contains(BuildConfig.BUILD_ID));
         assertTrue(copied.contains("Provider calls observed: 5"));
+    }
+
+    @Test
+    public void glassNavigationIsASiblingOverlayWithScrollClearance() {
+        View root = activity.findViewById(R.id.screen_root);
+        View scroll = activity.findViewById(R.id.studio_scroll);
+        View navigation = activity.findViewById(R.id.glass_navigation);
+        assertSame(root, navigation.getParent());
+        assertSame(root, scroll.getParent());
+        assertTrue(scroll.getPaddingBottom() >= 106 * activity.getResources().getDisplayMetrics().density);
+    }
+
+    @Test
+    public void draggingGlassFarOutsideBarKeepsLensInsideAndSelectsDestination() {
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        navigation.layout(0, 0, 360, 90);
+        long time = android.os.SystemClock.uptimeMillis();
+        android.view.MotionEvent down = android.view.MotionEvent.obtain(time, time,
+                android.view.MotionEvent.ACTION_DOWN, navigation.lensCenterX(), navigation.lensCenterY(), 0);
+        navigation.onTouchEvent(down); down.recycle();
+        for (float[] position : new float[][]{{-10000, -10000}, {10000, 10000}, {10000, 45}}) {
+            android.view.MotionEvent move = android.view.MotionEvent.obtain(time, time + 20,
+                    android.view.MotionEvent.ACTION_MOVE, position[0], position[1], 0);
+            navigation.onTouchEvent(move); move.recycle();
+            assertTrue(navigation.isLensContained());
+        }
+        android.view.MotionEvent up = android.view.MotionEvent.obtain(time, time + 40,
+                android.view.MotionEvent.ACTION_UP, 10000, 45, 0);
+        navigation.onTouchEvent(up); up.recycle();
+        assertEquals(LiquidGlassNavigationView.DEVICE, navigation.getSelectedTab());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_setup).getVisibility());
+        navigation.pauseGlass();
+        assertTrue(navigation.isLensContained());
+    }
+
+    @Test
+    public void virtualNavigationButtonsAreLabeledAndActionable() {
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        android.view.accessibility.AccessibilityNodeProvider provider = navigation.getAccessibilityNodeProvider();
+        android.view.accessibility.AccessibilityNodeInfo device = provider.createAccessibilityNodeInfo(2);
+        assertEquals(activity.getString(R.string.tab_device), device.getText().toString());
+        assertTrue(device.isClickable());
+        assertTrue(provider.performAction(2, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
+        assertEquals(LiquidGlassNavigationView.DEVICE, navigation.getSelectedTab());
+        assertFalse(provider.performAction(99, android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK, null));
+    }
+
+    @Test
+    @Config(sdk = 32)
+    public void android12UsesSafeBitmapFallbackAndCanNavigate() {
+        LiquidGlassNavigationView navigation = activity.findViewById(R.id.glass_navigation);
+        navigation.layout(0, 0, 360, 90);
+        navigation.draw(new android.graphics.Canvas(android.graphics.Bitmap.createBitmap(360, 90,
+                android.graphics.Bitmap.Config.ARGB_8888)));
+        navigation.selectTab(LiquidGlassNavigationView.ANIMATOR, false);
+        assertTrue(navigation.isLensContained());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_motion).getVisibility());
     }
 }

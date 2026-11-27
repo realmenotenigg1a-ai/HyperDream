@@ -33,6 +33,7 @@ public final class MainActivity extends Activity {
     private TextView configurationStatus;
     private final ExecutorService restartWorker = Executors.newSingleThreadExecutor();
     private MotionPreviewView preview;
+    private LiquidGlassNavigationView navigation;
     private LinearLayout cardStack;
     private boolean binding;
     private final Runnable entrance = this::animateEntrance;
@@ -82,12 +83,13 @@ public final class MainActivity extends Activity {
             saveSpring();
         });
         findViewById(R.id.refresh_hooks).setOnClickListener(view -> refreshHookReport());
-        RadioGroup tabs = findViewById(R.id.studio_tabs);
-        tabs.setOnCheckedChangeListener((group, checkedId) -> showPage(checkedId, true));
-        int initialTab = savedInstanceState == null ? R.id.tab_spring
-                : savedInstanceState.getInt("studio_tab", R.id.tab_spring);
-        tabs.check(initialTab);
-        showPage(initialTab, false);
+        navigation = findViewById(R.id.glass_navigation);
+        navigation.setBackdropSource(findViewById(R.id.studio_scroll));
+        navigation.setOnTabSelectedListener(tab -> showPage(tab, true));
+        int initialTab = savedInstanceState == null ? LiquidGlassNavigationView.HOME
+                : savedInstanceState.getInt("studio_tab", LiquidGlassNavigationView.HOME);
+        navigation.selectTab(initialTab, false);
+        showPage(navigation.getSelectedTab(), false);
         enableDuration.setOnCheckedChangeListener((button, checked) -> save());
         durationPresets.setOnCheckedChangeListener((group, checkedId) -> save());
         curvePresets.setOnCheckedChangeListener((group, checkedId) -> save());
@@ -131,22 +133,23 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refreshHookReport();
+        if (navigation != null) { navigation.resumeGlass(); }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
-        state.putInt("studio_tab", ((RadioGroup) findViewById(R.id.studio_tabs)).getCheckedRadioButtonId());
+        state.putInt("studio_tab", navigation.getSelectedTab());
         super.onSaveInstanceState(state);
     }
 
     private void showPage(int tab, boolean animate) {
         preview.stop();
-        int selected = tab == R.id.tab_motion ? R.id.page_motion
-                : tab == R.id.tab_device ? R.id.page_setup : R.id.page_spring;
+        int selected = tab == LiquidGlassNavigationView.ANIMATOR ? R.id.page_motion
+                : tab == LiquidGlassNavigationView.DEVICE ? R.id.page_setup : R.id.page_spring;
         for (int id : new int[]{R.id.page_spring, R.id.page_motion, R.id.page_setup, R.id.page_features}) {
             View page = findViewById(id);
             page.animate().cancel();
-            boolean visible = id == selected || (tab == R.id.tab_device && id == R.id.page_features);
+            boolean visible = id == selected || (tab == LiquidGlassNavigationView.DEVICE && id == R.id.page_features);
             page.setVisibility(visible ? View.VISIBLE : View.GONE);
             page.setAlpha(1f);
             page.setTranslationY(0f);
@@ -154,9 +157,11 @@ public final class MainActivity extends Activity {
                 page.setAlpha(0f);
                 page.setTranslationY(10 * getResources().getDisplayMetrics().density);
                 page.animate().alpha(1f).translationY(0f).setDuration(220).setStartDelay(0)
-                        .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f)).start();
+                        .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f))
+                        .withEndAction(navigation::requestBackdropRefresh).start();
             }
         }
+        navigation.requestBackdropRefresh();
         refreshHookReport();
     }
 
@@ -312,7 +317,8 @@ public final class MainActivity extends Activity {
             child.setTranslationY(distance);
             child.animate().alpha(1f).translationY(0f)
                     .setDuration(320).setStartDelay(Math.min(i * 35L, 210L))
-                    .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f)).start();
+                    .setInterpolator(new PathInterpolator(0.2f, 0f, 0f, 1f))
+                    .withEndAction(navigation::requestBackdropRefresh).start();
         }
     }
 
@@ -326,6 +332,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onStop() {
+        navigation.pauseGlass();
         cardStack.removeCallbacks(entrance);
         for (int i = 0; i < cardStack.getChildCount(); i++) {
             View child = cardStack.getChildAt(i);

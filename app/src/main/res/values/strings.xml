@@ -46,7 +46,7 @@
     <string name="feature_motion_body">A guarded Java spring-provider adapter is now in the Spring tab. Native transition support, custom curve editing, genie effects, and per-app profiles remain unimplemented.</string>
     <string name="feature_sharing_title">Layouts and sharing · Research needed</string>
     <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
-    <string name="glass_disclaimer">Glass-inspired styling, not live optical blur.
+    <string name="glass_disclaimer">Floating navigation samples app content for blur and refraction. Highlights are simulated, not Apple’s proprietary renderer.
 Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="curve_heading">Easing curve</string>
     <string name="curve_system">Original — preserve launcher easing</string>
@@ -75,7 +75,8 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="device_report">Device: %1$s %2$s\nAndroid: %3$s (API %4$s)\nOS incremental build: %5$s\nXiaomi launcher: %6$s\nHyperOS compatibility: NOT VERIFIED. Build information is not certification. Share your full HyperOS version and launcher APK for investigation.</string>
     <string name="copy_diagnostics">Copy build details</string>
     <string name="build_identity">v%1$s · build %2$s</string>
-    <string name="tab_spring">Spring</string>
+    <string name="nav_home">Home</string>
+    <string name="navigation_description">Floating navigation. Home opens spring controls. Drag the glass selection lens within the bar or tap a destination.</string>
     <string name="tab_motion">Animator</string>
     <string name="tab_device">Device</string>
     <string name="spring_title">Spring studio</string>

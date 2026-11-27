@@ -57,6 +57,14 @@ HyperOS 4 is the intended target, not a claim of verified support. Compatibility
 - [ ] Test on explicitly documented device and firmware combinations.
 - [ ] Publish a first test release with installation instructions and known issues.
 
+## v0.7: floating glass navigation
+
+**Home / Animator / Device** now live in a floating bottom capsule over the solid black screen. Home opens the spring controls. Drag the circular glass lens; its entire circumference is constrained inside the capsule, including the rounded ends. Release to select the nearest destination, or tap a destination directly.
+
+The bar samples **HyperDream’s own content beneath it**, not a static glass image. Android 13+ uses an AGSL shader for curved-edge displacement, a blurred backdrop, small channel separation and moving specular highlights. Android 12/12L uses a real captured/blurred bitmap with lens magnification and gradient highlights. Black content produces mostly dark glass—no fake wallpaper or camera reflections are added. This is an independent liquid-glass-inspired renderer, not Apple’s proprietary implementation.
+
+The bar stays above system insets, leaves scroll clearance for the final controls, exposes three labeled/selected accessibility buttons and supports keyboard arrows. Spring settling respects system animations-off. Scroll captures are coalesced to at most roughly 30 fps; no idle capture loop, network access, root, screenshot permission or stored screenshots are involved. **This release does not modify or fix the launcher hook.** Physical-device visual/performance and TalkBack checks remain necessary.
+
 ## v0.6.1: plain background and easier report copying
 
 The screen and system-bar background are solid black; the decorative gradient backdrop has been removed. A **Copy diagnostic report** shortcut in the Spring tab copies the same build/runtime/hook evidence as the Device-page action. This is a UI/accessibility update, **not a claim that launcher compatibility has been fixed**. The spring hook is unchanged from v0.6.
