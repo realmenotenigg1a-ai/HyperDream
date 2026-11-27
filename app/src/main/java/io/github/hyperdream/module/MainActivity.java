@@ -34,6 +34,10 @@ public final class MainActivity extends Activity {
     private final ExecutorService restartWorker = Executors.newSingleThreadExecutor();
     private MotionPreviewView preview;
     private LiquidGlassNavigationView navigation;
+    private final StudioMotion studioMotion = new StudioMotion();
+    private int activeTab = -1;
+    private int[] pageScrolls = new int[3];
+    private boolean diagnosticsExpanded;
     private LinearLayout cardStack;
     private boolean binding;
     private final Runnable entrance = this::animateEntrance;
@@ -51,6 +55,11 @@ public final class MainActivity extends Activity {
             return insets;
         });
         root.requestApplyInsets();
+        if (savedInstanceState != null) {
+            int[] restoredScrolls = savedInstanceState.getIntArray("page_scrolls");
+            if (restoredScrolls != null && restoredScrolls.length == 3) { pageScrolls = restoredScrolls; }
+            diagnosticsExpanded = savedInstanceState.getBoolean("diagnostics_expanded", false);
+        }
         enableDuration = findViewById(R.id.enable_duration);
         durationPresets = findViewById(R.id.duration_presets);
         configurationStatus = findViewById(R.id.configuration_status);
@@ -74,7 +83,9 @@ public final class MainActivity extends Activity {
                 if (fromUser) { saveSpring(); }
             }
             @Override public void onStartTrackingTouch(SeekBar bar) {}
-            @Override public void onStopTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {
+                StudioMotion.acknowledge(findViewById(R.id.spring_saved));
+            }
         };
         springResponse.setOnSeekBarChangeListener(springListener);
         springDamping.setOnSeekBarChangeListener(springListener);
@@ -82,7 +93,15 @@ public final class MainActivity extends Activity {
             bindSpring(new SpringSettings(false, 1f, 1f));
             saveSpring();
         });
-        findViewById(R.id.refresh_hooks).setOnClickListener(view -> refreshHookReport());
+        findViewById(R.id.refresh_hooks).setOnClickListener(view -> {
+            refreshHookReport();
+            StudioMotion.acknowledge(hookReport);
+        });
+        updateDiagnosticDisclosure(false);
+        findViewById(R.id.toggle_diagnostics).setOnClickListener(view -> {
+            diagnosticsExpanded = !diagnosticsExpanded;
+            updateDiagnosticDisclosure(true);
+        });
         navigation = findViewById(R.id.glass_navigation);
         navigation.setBackdropSource(findViewById(R.id.studio_scroll));
         navigation.setOnTabSelectedListener(tab -> showPage(tab, true));
@@ -118,12 +137,9 @@ public final class MainActivity extends Activity {
         };
         findViewById(R.id.copy_diagnostics).setOnClickListener(copyDiagnostics);
         findViewById(R.id.copy_hook_diagnostics).setOnClickListener(copyDiagnostics);
-        findViewById(R.id.restart_launcher).setOnClickListener(view -> new AlertDialog.Builder(this)
-                .setTitle(R.string.restart_launcher)
-                .setMessage(R.string.restart_confirmation)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.restart_confirm_button, (dialog, which) -> restartLauncher())
-                .show());
+        findViewById(R.id.restart_launcher).setOnClickListener(view -> showRestartConfirmation());
+        studioMotion.bind(root);
+        studioMotion.refresh();
         if (savedInstanceState == null) {
             cardStack.post(entrance);
         }
@@ -133,16 +149,27 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refreshHookReport();
+        studioMotion.refresh();
         if (navigation != null) { navigation.resumeGlass(); }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle state) {
         state.putInt("studio_tab", navigation.getSelectedTab());
+        if (activeTab >= 0) { pageScrolls[activeTab] = findViewById(R.id.studio_scroll).getScrollY(); }
+        state.putIntArray("page_scrolls", pageScrolls);
+        state.putBoolean("diagnostics_expanded", diagnosticsExpanded);
         super.onSaveInstanceState(state);
     }
 
     private void showPage(int tab, boolean animate) {
+        android.widget.ScrollView scroll = findViewById(R.id.studio_scroll);
+        if (activeTab >= 0 && activeTab != tab) { pageScrolls[activeTab] = scroll.getScrollY(); }
+        activeTab = tab;
+        ((TextView) findViewById(R.id.studio_heading)).setText(tab == LiquidGlassNavigationView.ANIMATOR
+                ? R.string.animator_hero : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_hero : R.string.glass_hero);
+        ((TextView) findViewById(R.id.studio_caption)).setText(tab == LiquidGlassNavigationView.ANIMATOR
+                ? R.string.animator_caption : tab == LiquidGlassNavigationView.DEVICE ? R.string.device_caption : R.string.glass_subtitle);
         preview.stop();
         int selected = tab == LiquidGlassNavigationView.ANIMATOR ? R.id.page_motion
                 : tab == LiquidGlassNavigationView.DEVICE ? R.id.page_setup : R.id.page_spring;
@@ -161,8 +188,48 @@ public final class MainActivity extends Activity {
                         .withEndAction(navigation::requestBackdropRefresh).start();
             }
         }
+        scroll.post(() -> {
+            if (activeTab == tab && !isDestroyed()) {
+                scroll.scrollTo(0, Math.max(0, pageScrolls[tab]));
+                navigation.requestBackdropRefresh();
+            }
+        });
+        if (animate) { StudioMotion.acknowledge(findViewById(R.id.studio_heading)); }
         navigation.requestBackdropRefresh();
         refreshHookReport();
+    }
+
+    private void updateDiagnosticDisclosure(boolean animate) {
+        View details = findViewById(R.id.diagnostic_details);
+        details.animate().cancel();
+        details.setAlpha(1);
+        details.setTranslationY(0);
+        details.setVisibility(diagnosticsExpanded ? View.VISIBLE : View.GONE);
+        android.widget.Button button = findViewById(R.id.toggle_diagnostics);
+        button.setText(diagnosticsExpanded ? R.string.hide_diagnostics : R.string.show_diagnostics);
+        button.setStateDescription(getString(diagnosticsExpanded ? R.string.expanded : R.string.collapsed));
+        if (animate && diagnosticsExpanded && ValueAnimator.areAnimatorsEnabled()) {
+            details.setAlpha(0);
+            details.setTranslationY(6 * getResources().getDisplayMetrics().density);
+            details.animate().alpha(1).translationY(0).setDuration(200).setStartDelay(0).start();
+        }
+        if (navigation != null) { navigation.requestBackdropRefresh(); }
+    }
+
+    private void showRestartConfirmation() {
+        StudioMotion dialogMotion = new StudioMotion();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.restart_launcher)
+                .setMessage(R.string.restart_confirmation)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.restart_confirm_button, (confirmation, which) -> restartLauncher())
+                .create();
+        dialog.setOnShowListener(shown -> {
+            dialogMotion.bind(dialog.getWindow().getDecorView());
+            dialogMotion.refresh();
+        });
+        dialog.setOnDismissListener(dismissed -> dialogMotion.stop());
+        dialog.show();
     }
 
     private void bindSpring(SpringSettings settings) {
@@ -193,6 +260,10 @@ public final class MainActivity extends Activity {
         if (!binding) {
             SettingsStore.writeSpring(this, new SpringSettings(enableSpring.isChecked(),
                     responseValue(), dampingValue()));
+            ((TextView) findViewById(R.id.spring_saved)).setText(R.string.saved_locally);
+            if (!springResponse.isPressed() && !springDamping.isPressed()) {
+                StudioMotion.acknowledge(findViewById(R.id.spring_saved));
+            }
             refreshHookReport();
         }
     }
@@ -292,6 +363,8 @@ public final class MainActivity extends Activity {
         showConfiguration(settings);
         configurationStatus.setText(getString(R.string.config_saved,
                 configurationStatus.getText()));
+        ((TextView) findViewById(R.id.motion_saved)).setText(R.string.saved_locally);
+        StudioMotion.acknowledge(findViewById(R.id.motion_saved));
     }
 
     private void showConfiguration(AnimationSettings settings) {
@@ -332,6 +405,12 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onStop() {
+        studioMotion.stop();
+        for (int id : new int[]{R.id.spring_saved, R.id.motion_saved, R.id.studio_heading,
+                R.id.diagnostic_details, R.id.hook_report}) {
+            View view = findViewById(id);
+            view.animate().cancel(); view.setAlpha(1); view.setTranslationY(0);
+        }
         navigation.pauseGlass();
         cardStack.removeCallbacks(entrance);
         for (int i = 0; i < cardStack.getChildCount(); i++) {

@@ -5,12 +5,12 @@
     <string name="tagline">Your animations. Your flow. Your HyperOS.</string>
     <string name="development_status">Early development</string>
     <string name="status_details">The Animator tab targets standard Android setters. The Spring tab separately targets a guarded Java launcher spring-provider API. Neither can control native-only HyperOS transitions. No HyperOS 4 device has been verified.</string>
-    <string name="setup_heading">Test the module entry point</string>
+    <string name="setup_heading">Launcher setup</string>
     <string name="setup_details">1. Install and enable HyperDream in LSPosed.\n\n2. Select only the Xiaomi launcher (com.miui.home) in its scope.\n\n3. Reboot your test device.\n\n4. Check LSPosed logs for the HyperDream diagnostic message.</string>
-    <string name="activation_notice">Controls are off by default. Spring and Animator settings are independent. Check the last launcher report below; saved settings alone do not prove a hook ran.</string>
+    <string name="activation_notice">Settings save on this device. Saved settings do not confirm that the launcher applied them.</string>
     <string name="safety_notice">Test on a device you can recover. Disable HyperDream in LSPosed and reboot if problems occur.</string>
-    <string name="enable_duration">Enable experimental motion controls</string>
-    <string name="duration_heading">Duration multiplier (lower is faster)</string>
+    <string name="enable_duration">Use animator settings · Experimental</string>
+    <string name="duration_heading">Choose your pace</string>
     <string name="duration_fast">0.5× — Fast</string>
     <string name="duration_quick">0.75× — Quick</string>
     <string name="duration_default">1× — Original duration</string>
@@ -19,19 +19,19 @@
     <string name="restart_notice">Settings save automatically. Restart the launcher or reboot after any change, including disabling or restoring defaults. Running launcher animations keep the previous configuration until its process restarts.</string>
     <string name="settings_saved">Saved. Reboot to apply.</string>
     <string name="brand_edition">MOTION STUDIO · HYPEROS</string>
-    <string name="glass_hero">Motion, reimagined.</string>
-    <string name="glass_subtitle">Spring physics, fluid timing, and clear compatibility reports. Built for investigation on HyperOS 4.</string>
-    <string name="experimental_badge">EXPERIMENTAL · DEVICE TESTING NEEDED</string>
+    <string name="glass_hero">Make it feel yours.</string>
+    <string name="glass_subtitle">A little faster. A little softer. Start with the feel you like.</string>
+    <string name="experimental_badge">EXPERIMENTAL · LAUNCHER SUPPORT UNVERIFIED</string>
     <string name="motion_title">Motion lab</string>
-    <string name="motion_summary">Tune the rhythm of standard launcher animations. Lower duration means faster motion.</string>
-    <string name="play_preview">Play local preview</string>
-    <string name="preview_notice">Illustration only. Uses selected duration, easing, and delay settings even when the module control is off. Original easing uses demonstration curves, not the HyperOS curves. This is not a launcher compatibility test.</string>
+    <string name="motion_summary">Try a pace, choose a curve, then replay the preview. The preview works without LSPosed.</string>
+    <string name="play_preview">Replay preview</string>
+    <string name="preview_notice">In-app illustration only—not a recording of your launcher or proof that hooks work.</string>
     <string name="preview_accessibility">Illustration of an app opening from an icon and returning to the home screen. Use Play local preview to animate.</string>
     <string name="preview_reduced_motion">System animations are disabled. Showing a still preview.</string>
-    <string name="config_off">Animator configuration: off. Launcher activation not checked.</string>
-    <string name="config_original">Animator configuration: enabled with original timing and easing. No animation overrides needed.</string>
-    <string name="config_enabled">Animator configuration: duration %1$s×, easing %2$s, delays %3$s. Activation not checked.</string>
-    <string name="config_saved">%1$s Restart launcher or reboot to apply.</string>
+    <string name="config_off">Animator settings are off. Launcher support is unverified.</string>
+    <string name="config_original">Animator settings use original timing and easing.</string>
+    <string name="config_enabled">Animator: %1$s× · %2$s · delays %3$s. Support unverified.</string>
+    <string name="config_saved">%1$s Restart a supported launcher to apply.</string>
     <string name="features_title">Beyond motion</string>
     <string name="features_intro">Home Up-inspired direction, not feature parity. Everything below is planned and unavailable. There are no hidden working controls here.</string>
     <string name="feature_home_title">Home screen · Planned</string>
@@ -48,7 +48,7 @@
     <string name="feature_sharing_body">Layout backup and restore, DIY-style placement, and share-panel customization are research areas, not promised features. Feasibility depends on HyperOS internals.</string>
     <string name="glass_disclaimer">Floating navigation samples app content for blur and refraction. Highlights are simulated, not Apple’s proprietary renderer.
 Independent project. Not affiliated with Xiaomi or Samsung.</string>
-    <string name="curve_heading">Easing curve</string>
+    <string name="curve_heading">Choose how it moves</string>
     <string name="curve_system">Original — preserve launcher easing</string>
     <string name="curve_smooth">Smooth — balanced ease in and out</string>
     <string name="curve_emphasized">Liquid glide — quick start, soft landing</string>
@@ -60,7 +60,7 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="restart_launcher">Restart Xiaomi launcher</string>
     <string name="restart_confirm_button">Restart with root</string>
     <string name="restart_confirmation">This requests root access to force-stop and reopen Xiaomi System Launcher (com.miui.home) for the current user. It will return you to Home and interrupt launcher activity. No app data is cleared. Only the owner profile with Xiaomi launcher as default is supported. Save your work first. This does not verify animation compatibility.</string>
-    <string name="restart_explanation">Optional root-only shortcut, never automatic. Confirm each restart and grant root if prompted. Reboot manually if root access is unavailable.</string>
+    <string name="restart_explanation">Optional · requires root and confirmation. This does not verify compatibility.</string>
     <string name="restart_running">Waiting for root / restarting (up to 30 seconds)…</string>
     <string name="restart_completed">Restart command completed. Check LSPosed logs to confirm the module loaded and test actual animations; compatibility is not verified.</string>
     <string name="restart_no_root">Could not start the root command or access its temporary output. Check your root manager. Reboot manually to apply settings.</string>
@@ -80,13 +80,13 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string name="tab_motion">Animator</string>
     <string name="tab_device">Device</string>
     <string name="spring_title">Spring studio</string>
-    <string name="spring_explanation">An experimental adapter for the Java launcher spring provider used during app opening from Home and closing to Home. This changes spring parameters, not just a speed graph.</string>
-    <string name="spring_enable">Enable Java spring overrides</string>
+    <string name="spring_explanation">Adjust response and bounce for supported app opening and closing animations.</string>
+    <string name="spring_enable">Use spring settings · Experimental</string>
     <string name="spring_response_value">Response multiplier · %1$s×</string>
     <string name="spring_damping_value">Damping ratio · %1$s</string>
     <string name="spring_response_accessibility">Spring response multiplier, from 0.5 to 1.5</string>
     <string name="spring_damping_accessibility">Spring damping ratio, from 0.5 to 1.2</string>
-    <string name="spring_values_notice">Lower response is faster. Damping below 1 permits more bounce; 1 is critically damped and above 1 is overdamped. Applies to all parameters returned for supported opening/closing types, not to icon size. Restart launcher or reboot after changes.</string>
+    <string name="spring_values_notice">Lower response feels faster. Lower damping adds bounce. Restart a supported launcher after changes; native HyperOS transitions are not supported.</string>
     <string name="spring_reset">Disable and reset springs</string>
     <string name="spring_compatibility">Requires the exact Java SpringParamsProvider API. Stock HyperOS 4 may use a native launcher without this API. In that case LSPosed cannot apply this adapter; no effect is promised. Do not install an unknown replacement launcher just to try it.</string>
     <string name="refresh_hooks">Refresh launcher report</string>
@@ -117,4 +117,15 @@ Independent project. Not affiliated with Xiaomi or Samsung.</string>
     <string-array name="xposed_scope">
         <item>com.miui.home</item>
     </string-array>
+    <string name="animator_hero">Find your flow.</string>
+    <string name="animator_caption">Preview a new rhythm. Keep the one that feels right.</string>
+    <string name="device_hero">Your setup, clearly.</string>
+    <string name="device_caption">Build details, launcher setup, and honest compatibility reports.</string>
+    <string name="experimental_short">Experimental · launcher support is unverified. Controls do not affect native-only transitions.</string>
+    <string name="show_diagnostics">Show compatibility details</string>
+    <string name="hide_diagnostics">Hide compatibility details</string>
+    <string name="expanded">Expanded</string>
+    <string name="collapsed">Collapsed</string>
+    <string name="autosave_hint">Changes save automatically on this device.</string>
+    <string name="saved_locally">Saved on this device · launcher application unverified.</string>
 </resources>

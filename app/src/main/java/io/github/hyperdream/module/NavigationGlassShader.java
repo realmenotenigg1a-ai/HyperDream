@@ -26,7 +26,9 @@ final class NavigationGlassShader {
     }
 
     void setBackdrop(Bitmap bitmap, float scaleX, float scaleY) {
-        shader.setInputShader("backdrop", new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        BitmapShader input = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        input.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+        shader.setInputShader("backdrop", input);
         shader.setFloatUniform("captureScale", scaleX, scaleY);
     }
 

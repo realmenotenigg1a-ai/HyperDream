@@ -319,4 +319,54 @@ public final class MotionUiTest {
         assertEquals(1080, logo.getHeight());
         assertEquals(R.drawable.ic_launcher, activity.getApplicationInfo().icon);
     }
+
+    @Test
+    public void technicalDetailsAreOptInAndDisclosureSurvivesRecreation() {
+        assertEquals(View.GONE, activity.findViewById(R.id.diagnostic_details).getVisibility());
+        activity.findViewById(R.id.toggle_diagnostics).performClick();
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.diagnostic_details).getVisibility());
+        assertEquals(activity.getString(R.string.expanded),
+                activity.findViewById(R.id.toggle_diagnostics).getStateDescription().toString());
+        controller.recreate(); activity = controller.get();
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.diagnostic_details).getVisibility());
+        activity.findViewById(R.id.toggle_diagnostics).performClick();
+        assertEquals(View.GONE, activity.findViewById(R.id.diagnostic_details).getVisibility());
+    }
+
+    @Test
+    public void restartAndConfigurationStatusLiveInDeviceInsteadOfCoveringStudio() {
+        View setup = activity.findViewById(R.id.page_setup);
+        android.view.ViewParent parent = activity.findViewById(R.id.restart_launcher).getParent();
+        while (parent != null && parent != setup) { parent = parent.getParent(); }
+        assertSame(setup, parent);
+        ((LiquidGlassNavigationView) activity.findViewById(R.id.glass_navigation))
+                .selectTab(LiquidGlassNavigationView.ANIMATOR, false);
+        assertEquals(activity.getString(R.string.animator_hero),
+                ((android.widget.TextView) activity.findViewById(R.id.studio_heading)).getText().toString());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.page_motion).getVisibility());
+        assertEquals(View.GONE, setup.getVisibility());
+    }
+
+    @Test
+    public void motionFeedbackCoversButtonsSwitchesRadiosAndSlidersWithoutChangingClicks() {
+        StudioMotion feedback = new StudioMotion();
+        feedback.bind(activity.findViewById(R.id.screen_root));
+        feedback.refresh(true);
+        for (int id : new int[]{R.id.play_preview, R.id.enable_duration, R.id.duration_fast, R.id.spring_damping}) {
+            assertNotNull(activity.findViewById(id).getStateListAnimator());
+        }
+        ((Switch) activity.findViewById(R.id.enable_duration)).performClick();
+        assertTrue(SettingsStore.read(activity).enabled);
+        ((RadioButton) activity.findViewById(R.id.duration_fast)).performClick();
+        assertEquals(0.5f, SettingsStore.read(activity).durationScale, 0f);
+        assertEquals(activity.getString(R.string.saved_locally),
+                ((android.widget.TextView) activity.findViewById(R.id.motion_saved)).getText().toString());
+        activity.findViewById(R.id.duration_fast).setScaleX(0.9f);
+        feedback.refresh(false);
+        for (int id : new int[]{R.id.play_preview, R.id.enable_duration, R.id.duration_fast, R.id.spring_damping}) {
+            assertNull(activity.findViewById(id).getStateListAnimator());
+            assertEquals(1f, activity.findViewById(id).getScaleX(), 0f);
+        }
+        feedback.stop();
+    }
 }

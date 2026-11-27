@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" style="@style/GlassCard">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/status_pill"
+                    android:text="@string/experimental_badge"
+                    android:textColor="@color/mint"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/configuration_status"
+                    style="@style/GlassBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/config_off"
+                    android:textColor="@color/text_primary" />
+                <TextView style="@style/GlassBody" android:text="@string/activation_notice" />
+                <Button android:id="@+id/restart_launcher" style="@style/GlassButton" android:text="@string/restart_launcher" />
+                <TextView
+                    android:id="@+id/restart_status"
+                    style="@style/GlassBody"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/restart_explanation" />
+
+            </LinearLayout>
+
     <TextView style="@style/GlassTitle" android:text="@string/setup_heading" />
     <TextView style="@style/GlassBody" android:text="@string/setup_details" />
     <TextView style="@style/GlassBody" android:text="@string/status_details" />

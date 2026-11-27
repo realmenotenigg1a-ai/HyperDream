@@ -1,8 +1,15 @@
 package io.github.hyperdream.module;
 
-/** Allocation-free separable box blur for the API 31/32 backdrop fallback. */
+/** Allocation-free backdrop prefilter shared by AGSL and bitmap renderers. */
 final class BackdropBlur {
     private BackdropBlur() {}
+
+    /** Three box passes approximate a Gaussian; working is disposable capture-pixel storage. */
+    static void frost(int[] working, int[] scratch, int[] output, int width, int height, int radius) {
+        apply(working, scratch, output, width, height, radius);
+        apply(output, scratch, working, width, height, radius);
+        apply(working, scratch, output, width, height, radius);
+    }
 
     static void apply(int[] source, int[] scratch, int[] output, int width, int height, int radius) {
         long length = (long) width * height;

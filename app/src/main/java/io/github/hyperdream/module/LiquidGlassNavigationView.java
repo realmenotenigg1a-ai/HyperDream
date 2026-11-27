@@ -70,6 +70,8 @@ public final class LiquidGlassNavigationView extends View {
     private NavigationGlassShader glassShader;
     private GlassNavigationGeometry geometry = new GlassNavigationGeometry(0, 0, 0);
     private ValueAnimator settle;
+    private ValueAnimator selectionPulse;
+    private float iconEmphasis = 1;
     private OnTabSelectedListener listener;
     private int selected;
     private float lensX, lensY;
@@ -125,6 +127,16 @@ public final class LiquidGlassNavigationView extends View {
         boolean changed = selected != next;
         selected = next;
         settleLens(animate);
+        if (selectionPulse != null) { selectionPulse.cancel(); }
+        iconEmphasis = 1;
+        if (animate && ValueAnimator.areAnimatorsEnabled()) {
+            selectionPulse = ValueAnimator.ofFloat(1, 1.10f, 1);
+            selectionPulse.setDuration(220);
+            selectionPulse.addUpdateListener(frame -> {
+                iconEmphasis = (float) frame.getAnimatedValue(); invalidate();
+            });
+            selectionPulse.start();
+        }
         if (changed) {
             sendVirtualEvent(selected, AccessibilityEvent.TYPE_VIEW_SELECTED);
             if (listener != null) { listener.onTabSelected(selected); }
@@ -149,6 +161,8 @@ public final class LiquidGlassNavigationView extends View {
         removeCallbacks(captureFrame);
         capturePosted = false;
         cancelSettle();
+        if (selectionPulse != null) { selectionPulse.cancel(); selectionPulse = null; }
+        iconEmphasis = 1;
         activePointer = -1;
         dragging = false;
         positionLens(geometry.tabCenter(selected), getHeight() / 2f);
@@ -212,7 +226,7 @@ public final class LiquidGlassNavigationView extends View {
         if (paused || !isAttachedToWindow() || source == null || getWidth() <= 0 || getHeight() <= 0
                 || source.getWidth() <= 0 || source.getHeight() <= 0 || getWindowVisibility() != VISIBLE) { return; }
         lastCapture = SystemClock.uptimeMillis();
-        int width = Math.min(480, getWidth());
+        int width = Math.min(320, getWidth());
         int height = Math.max(1, Math.round(getHeight() * (width / (float) getWidth())));
         if (captured == null || captured.getWidth() != width || captured.getHeight() != height) {
             // Do not recycle bitmaps that may still be in a RenderThread display list.
@@ -224,6 +238,7 @@ public final class LiquidGlassNavigationView extends View {
             blurredPixels = new int[pixels.length];
         }
         captured.eraseColor(Color.BLACK);
+        boolean captureSucceeded = false;
         source.getLocationInWindow(sourceLocation);
         getLocationInWindow(ownLocation);
         int save = captureCanvas.save();
@@ -231,6 +246,7 @@ public final class LiquidGlassNavigationView extends View {
             captureCanvas.scale(width / (float) getWidth(), height / (float) getHeight());
             captureCanvas.translate(sourceLocation[0] - ownLocation[0], sourceLocation[1] - ownLocation[1]);
             source.draw(captureCanvas);
+            captureSucceeded = true;
         } catch (RuntimeException unsupportedCapture) {
             if (!captureFailureLogged) {
                 Log.w("HyperDreamGlass", "Backdrop capture unavailable; using tinted surface");
@@ -239,12 +255,13 @@ public final class LiquidGlassNavigationView extends View {
         } finally {
             captureCanvas.restoreToCount(save);
         }
+        if (!captureSucceeded) { captured.eraseColor(Color.BLACK); }
         captured.getPixels(pixels, 0, width, 0, 0, width, height);
-        int radius = Math.max(1, Math.min(32, Math.round(8 * density * width / getWidth())));
-        BackdropBlur.apply(pixels, scratch, blurredPixels, width, height, radius);
+        int radius = Math.max(1, Math.min(32, Math.round(10 * density * width / getWidth())));
+        BackdropBlur.frost(pixels, scratch, blurredPixels, width, height, radius);
         blurred.setPixels(blurredPixels, 0, width, 0, 0, width, height);
         if (Build.VERSION.SDK_INT >= 33 && glassShader != null) {
-            glassShader.setBackdrop(captured, width / (float) getWidth(), height / (float) getHeight());
+            glassShader.setBackdrop(blurred, width / (float) getWidth(), height / (float) getHeight());
         }
         invalidate();
     }
@@ -277,7 +294,10 @@ public final class LiquidGlassNavigationView extends View {
             paint.setStrokeWidth(2.1f * density);
             paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND);
+            int iconSave = canvas.save();
+            if (tab == selected) { canvas.scale(iconEmphasis, iconEmphasis, cx, iconY); }
             drawIcon(canvas, tab, cx, iconY);
+            canvas.restoreToCount(iconSave);
             text.setColor(color);
             canvas.drawText(drawnLabels[tab] == null ? labels[tab] : drawnLabels[tab], cx, h * 0.78f, text);
         }
@@ -304,22 +324,22 @@ public final class LiquidGlassNavigationView extends View {
         paint.setShader(null);
         paint.setStyle(Paint.Style.FILL);
         if (blurred != null) { canvas.drawBitmap(blurred, null, rect, paint); }
-        paint.setColor(0xB018242D);
+        paint.setColor(0xD1090D11);
         canvas.drawRect(0, 0, w, h, paint);
         canvas.restoreToCount(save);
         path.reset();
         path.addCircle(lensX, lensY, geometry.lensRadius, Path.Direction.CW);
         save = canvas.save();
         canvas.clipPath(path);
-        canvas.scale(1.13f, 1.13f, lensX, lensY);
+        canvas.scale(1.04f, 1.04f, lensX, lensY);
         paint.setColor(Color.WHITE);
         if (blurred != null) { canvas.drawBitmap(blurred, null, rect, paint); }
-        paint.setColor(0x702C444D);
+        paint.setColor(0xD0182831);
         canvas.drawRect(0, 0, w, h, paint);
         canvas.restoreToCount(save);
         paint.setShader(new LinearGradient(lensX - geometry.lensRadius, lensY - geometry.lensRadius,
                 lensX + geometry.lensRadius, lensY + geometry.lensRadius,
-                new int[]{0xE6FFFFFF, 0x3972B9CD, 0xAAE4F6FF}, null, Shader.TileMode.CLAMP));
+                new int[]{0xB6FFFFFF, 0x3072B9CD, 0x70E4F6FF}, null, Shader.TileMode.CLAMP));
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1.2f * density);
         canvas.drawCircle(lensX, lensY, Math.max(0, geometry.lensRadius - density), paint);

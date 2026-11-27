@@ -35,6 +35,8 @@
                     android:layout_marginEnd="14dp"
                     android:contentDescription="@null"
                     android:importantForAccessibility="no"
+                    android:background="@drawable/logo_frame"
+                    android:clipToOutline="true"
                     android:src="@drawable/ic_launcher" />
 
                 <LinearLayout
@@ -62,36 +64,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:accessibilityHeading="true"
+                android:id="@+id/studio_heading"
                 android:fontFamily="sans-serif-light"
                 android:text="@string/glass_hero"
                 android:textColor="@color/text_primary"
-                android:textSize="38sp" />
-            <TextView style="@style/GlassBody" android:text="@string/glass_subtitle" />
-
-            <LinearLayout style="@style/GlassCard">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/status_pill"
-                    android:text="@string/experimental_badge"
-                    android:textColor="@color/mint"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:id="@+id/configuration_status"
-                    style="@style/GlassBody"
-                    android:accessibilityLiveRegion="polite"
-                    android:text="@string/config_off"
-                    android:textColor="@color/text_primary" />
-                <TextView style="@style/GlassBody" android:text="@string/activation_notice" />
-                <Button android:id="@+id/restart_launcher" style="@style/GlassButton" android:text="@string/restart_launcher" />
-                <TextView
-                    android:id="@+id/restart_status"
-                    style="@style/GlassBody"
-                    android:accessibilityLiveRegion="polite"
-                    android:text="@string/restart_explanation" />
-
-            </LinearLayout>
+                android:textSize="30sp" />
+            <TextView android:id="@+id/studio_caption" style="@style/GlassBody" android:text="@string/glass_subtitle" />
 
             <include android:id="@+id/page_spring" layout="@layout/card_spring" />
             <include android:id="@+id/page_motion" layout="@layout/card_motion" />

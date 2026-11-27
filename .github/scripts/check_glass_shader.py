@@ -36,3 +36,21 @@ assert np.any(red != blue), "Glass must respond to backdrop colors"
 assert red[0, 0, 3] == 0, "Capsule corners must remain transparent"
 assert red[45, 180, 3] == 255, "Capsule interior must be visible"
 print("PASS: glass shader compiles, samples changing pixels and clips to capsule")
+
+# A bright/dark text-like pattern must stay low-contrast beneath navigation labels.
+# Runtime supplies a real three-pass preblurred bitmap (covered separately by JVM tests).
+for capture_width in (240, 320, 480):
+    builder.setUniform("captureScale", [capture_width / 360.0, 1.0])
+    pattern = skia.Surface(capture_width, 90)
+    pattern.getCanvas().clear(skia.ColorBLACK)
+    for x in range(0, capture_width, 4):
+        pattern.getCanvas().drawRect(skia.Rect.MakeXYWH(x, 0, 2, 90), skia.Paint(Color=skia.ColorWHITE))
+    builder.setChild("backdrop", pattern.makeImageSnapshot().makeShader())
+    surface = skia.Surface(360, 90)
+    surface.getCanvas().drawRect(skia.Rect.MakeWH(360, 90), skia.Paint(Shader=builder.makeShader()))
+    pixels = surface.makeImageSnapshot().toarray()
+    # Centre band avoids lens/bar-edge specular highlights. Even unblurred adversarial
+    # input must not dominate foreground labels; real frosted input is smoother still.
+    band = pixels[32:58, 120:240, :3].astype(float)
+    assert float(np.max(band) - np.min(band)) < 65, "Backdrop glyphs overwhelm navigation"
+print("PASS: navigation text-backdrop contrast bounded across capture scales")
