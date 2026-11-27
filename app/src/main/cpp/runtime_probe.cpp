@@ -15,6 +15,8 @@ namespace {
 const Api* api = nullptr;
 using Loader = void* (*)(const char*, int, const android_dlextinfo*);
 Loader original_loader = nullptr;
+using PlainLoader = void* (*)(const char*, int);
+PlainLoader original_plain_loader = nullptr;
 std::atomic<unsigned> seen{0};
 std::atomic<bool> entered{false};
 // Every line identifies the payload revision and PID. No addresses or full filesystem paths.
@@ -43,13 +45,27 @@ int image(dl_phdr_info* info, size_t, void*) {
     REPORT("stage=IMAGE_SEEN image=%s elf_build_id=%s animation_applied=0", name, id);
     return 0;
 }
-void* observe_load(const char* name, int flags, const android_dlextinfo* ext) {
-    // Original is always called exactly once; flags, extension and return value are unchanged.
-    void* handle = original_loader(name, flags, ext);
+void* observe_result(const char* name, void* handle) {
     const int saved_errno = errno;
     if (handle && hyperdream::target_image(name)) dl_iterate_phdr(image, nullptr);
     errno = saved_errno;
     return handle;
+}
+void* observe_load(const char* name, int flags, const android_dlextinfo* ext) {
+    // Original is always called exactly once; all arguments and result are unchanged.
+    return observe_result(name, original_loader(name, flags, ext));
+}
+void* observe_plain_load(const char* name, int flags) {
+    return observe_result(name, original_plain_loader(name, flags));
+}
+void install_observer(const char* symbol, void* observer, void** original) {
+    void* target = dlsym(RTLD_DEFAULT, symbol);
+    if (!target || !api || !api->inlineHook) {
+        REPORT("stage=OBSERVER_UNAVAILABLE observer=%s animation_applied=0", symbol); return;
+    }
+    const int result = api->inlineHook(target, observer, original);
+    REPORT("stage=%s observer=%s result=%d animation_applied=0 reason=NO_VALIDATED_DURATION_PROFILE",
+           result == 0 && *original ? "OBSERVER_INSTALLED" : "OBSERVER_FAILED", symbol, result);
 }
 void specialized(const AppArgs* args) {
     if (!args || !hyperdream::launcher(args->package_name, args->process_name)) return;
@@ -57,14 +73,10 @@ void specialized(const AppArgs* args) {
     REPORT("stage=LAUNCHER_SPECIALIZED uid=%d animation_applied=0", getuid());
     dl_iterate_phdr(image, nullptr);
     // Hook only this child, never the shared spawner. This observes library loads, not animation calls.
-    void* target = dlsym(RTLD_DEFAULT, "android_dlopen_ext");
-    if (!target || !api || !api->inlineHook) {
-        REPORT("stage=OBSERVER_UNAVAILABLE animation_applied=0"); return;
-    }
-    const int result = api->inlineHook(target, reinterpret_cast<void*>(observe_load),
-                                      reinterpret_cast<void**>(&original_loader));
-    REPORT("stage=%s result=%d animation_applied=0 reason=NO_VALIDATED_DURATION_PROFILE",
-           result == 0 && original_loader ? "OBSERVER_INSTALLED" : "OBSERVER_FAILED", result);
+    install_observer("android_dlopen_ext", reinterpret_cast<void*>(observe_load),
+                     reinterpret_cast<void**>(&original_loader));
+    install_observer("dlopen", reinterpret_cast<void*>(observe_plain_load),
+                     reinterpret_cast<void**>(&original_plain_loader));
 }
 const HyosModule module{1, specialized};
 void loaded(void*, const Api* supplied) {
